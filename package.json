@@ -1,37 +1,37 @@
 {
-	"name": "node-raspberrypi-usbboot",
-	"version": "0.0.1",
-	"description": "Transforms Raspberry Pi Compute Modules and Zeros to mass storage devices.",
-	"main": "build/index.js",
-	"types": "build/index.d.ts",
-	"scripts": {
-		"lint": "resin-lint --typescript lib/*.ts typings/**/*.d.ts",
-		"build": "npm run lint && tsc"
-	},
-	"files": [
-		"build/index.js",
-		"build/index.d.ts",
-		"build/index.js.map",
-		"blobs",
-		"README.md",
-		"CHANGELOG.md"
-	],
-	"author": "Alexis Svinartchouk <alexis@resin.io>",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/resin-io-modules/node-raspberrypi-usbboot.git"
-	},
-	"license": "Apache-2.0",
-	"dependencies": {
-		"@types/node": "^8.10.10",
-		"debug": "^3.1.0",
-		"usb": "tessel/node-usb#dad0076389201c732cac2290b81ef22b1fcb883c"
-	},
-	"devDependencies": {
-		"@types/bluebird": "^3.5.20",
-		"@types/debug": "0.0.30",
-		"resin-lint": "^1.5.7",
-		"ts-node": "^6.0.3",
-		"typescript": "^2.8.3"
-	}
+  "name": "node-raspberrypi-usbboot",
+  "version": "0.0.2",
+  "description": "Transforms Raspberry Pi Compute Modules and Zeros to mass storage devices.",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "scripts": {
+    "lint": "resin-lint --typescript lib/*.ts typings/**/*.d.ts",
+    "build": "npm run lint && tsc"
+  },
+  "files": [
+    "build/index.js",
+    "build/index.d.ts",
+    "build/index.js.map",
+    "blobs",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "author": "Alexis Svinartchouk <alexis@resin.io>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/resin-io-modules/node-raspberrypi-usbboot.git"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@types/node": "^8.10.10",
+    "debug": "^3.1.0",
+    "usb": "tessel/node-usb#dad0076389201c732cac2290b81ef22b1fcb883c"
+  },
+  "devDependencies": {
+    "@types/bluebird": "^3.5.20",
+    "@types/debug": "0.0.30",
+    "resin-lint": "^1.5.7",
+    "ts-node": "^6.0.3",
+    "typescript": "^2.8.3"
+  }
 }
