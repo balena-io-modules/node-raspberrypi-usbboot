@@ -3,6 +3,7 @@
 	"version": "0.0.1",
 	"description": "Transforms Raspberry Pi Compute Modules and Zeros to mass storage devices.",
 	"main": "build/index.js",
+	"types": "build/index.d.ts",
 	"scripts": {
 		"lint": "resin-lint --typescript lib/*.ts typings/**/*.d.ts",
 		"build": "npm run lint && tsc"
