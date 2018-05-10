@@ -362,7 +362,7 @@ export class UsbbootScanner extends EventEmitter {
 		this.usbbootDevices.clear();
 	}
 
-	step(device: usb.Device, step: number): void {
+	private step(device: usb.Device, step: number): void {
 		const usbbootDevice = this.getOrCreate(device);
 		usbbootDevice.step = step;
 		if (step === UsbbootDevice.LAST_STEP) {
