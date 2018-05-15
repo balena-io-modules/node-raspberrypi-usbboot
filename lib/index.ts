@@ -350,6 +350,9 @@ export class UsbbootScanner extends EventEmitter {
 		debug('Waiting for BCM2835/6/7');
 		// Prepare already connected devices
 		usb.getDeviceList().map(this.boundAttachDevice);
+		// At this point all devices from `usg.getDeviceList()` above
+		// have had an 'attach' event emitted if they were raspberry pis.
+		this.emit('ready');
 		// Watch for new devices being plugged in and prepare them
 		usb.on('attach', this.boundAttachDevice);
 		// Watch for devices detaching
