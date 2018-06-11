@@ -3,13 +3,12 @@
  * Copyright 2016 Raspberry Pi Foundation
  */
 
-import { delay, fromCallback } from 'bluebird';
+import { delay, fromCallback, promisify } from 'bluebird';
 import * as _debug from 'debug';
 import { EventEmitter } from 'events';
 import { readFile as readFile_ } from 'fs';
 import * as Path from 'path';
 import * as usb from 'usb';
-import { promisify } from 'util';
 
 const readFile = promisify(readFile_);
 
