@@ -23,7 +23,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@types/node": "^8.10.10",
+    "@types/node": "^6.0.112",
     "debug": "^3.1.0",
     "usb": "tessel/node-usb#dad0076389201c732cac2290b81ef22b1fcb883c"
   },
@@ -32,6 +32,6 @@
     "@types/debug": "0.0.30",
     "resin-lint": "^1.5.7",
     "ts-node": "^6.0.3",
-    "typescript": "^2.8.3"
+    "typescript": "^2.9.1"
   }
 }
