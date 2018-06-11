@@ -2,7 +2,7 @@ import { UsbbootDevice, UsbbootScanner } from './';
 
 const main = () => {
 	const scanner = new UsbbootScanner();
-	scanner.on('error', (error) => {
+	scanner.on('error', (error: Error) => {
 		console.log('Error:', error);
 	});
 	scanner.on('attach', (usbbootDevice: UsbbootDevice) => {
