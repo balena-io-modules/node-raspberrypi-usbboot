@@ -5,9 +5,12 @@
 		"outDir": "build",
 		"sourceMap": true,
 		"declaration": true,
-		"target": "es2017",
+		"target": "es5",
 		"noImplicitAny": true,
-		"strictNullChecks": true
+		"strictNullChecks": true,
+		"lib": [
+			"es2015"
+		]
 	},
 	"include": [
 		"lib/*"
