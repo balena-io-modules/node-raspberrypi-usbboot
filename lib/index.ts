@@ -421,7 +421,7 @@ export class UsbbootScanner extends EventEmitter {
 			}
 			device.close();
 		} catch (error) {
-			this.emit('error', error);
+			this.remove(device);
 		}
 	}
 
