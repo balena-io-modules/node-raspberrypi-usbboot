@@ -1,6 +1,6 @@
 {
   "name": "node-raspberrypi-usbboot",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Transforms Raspberry Pi Compute Modules and Zeros to mass storage devices.",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -25,7 +25,7 @@
   "dependencies": {
     "@types/node": "^6.0.112",
     "debug": "^3.1.0",
-    "usb": "tessel/node-usb#dad0076389201c732cac2290b81ef22b1fcb883c"
+    "usb": "^1.3.2"
   },
   "devDependencies": {
     "@types/bluebird": "^3.5.20",
