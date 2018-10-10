@@ -157,7 +157,7 @@ const performControlTransfer = async (
 ) => {
 	const previousTimeout = device.timeout;
 	device.timeout = USB_CONTROL_TRANSFER_TIMEOUT_MS;
-	const result = await fromCallback((callback) => {
+	const result = await fromCallback((callback: (error: Error | null, data?: Buffer) => void) => {
 		device.controlTransfer(
 			bmRequestType,
 			bRequest,
