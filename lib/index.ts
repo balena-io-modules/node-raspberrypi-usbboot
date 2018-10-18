@@ -3,12 +3,15 @@
  * Copyright 2016 Raspberry Pi Foundation
  */
 
+import { Mutex } from 'async-mutex';
 import { delay, fromCallback, promisify } from 'bluebird';
 import * as _debug from 'debug';
 import { EventEmitter } from 'events';
 import { readFile as readFile_ } from 'fs';
 import * as Path from 'path';
 import * as usb from 'usb';
+
+const mutex = new Mutex();
 
 const readFile = promisify(readFile_);
 
@@ -220,12 +223,14 @@ const sendSize = async (device: usb.Device, size: number): Promise<void> => {
 };
 
 const epWrite = async (buffer: Buffer, device: usb.Device, endpoint: usb.Endpoint) => {
+	const release = await mutex.acquire();
 	await sendSize(device, buffer.length);
 	if (buffer.length > 0) {
 		await fromCallback((callback) => {
 			endpoint.transfer(buffer, callback);
 		});
 	}
+	release();
 };
 
 const epRead = async (device: usb.Device, bytesToRead: number): Promise<Buffer> => {
