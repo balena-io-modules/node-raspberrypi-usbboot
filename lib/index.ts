@@ -204,7 +204,7 @@ const initializeDevice = (device: usb.Device): { iface: usb.Interface, endpoint:
 	}
 	const iface = device.interface(interfaceNumber);
 	const endpoint = iface.endpoint(endpointNumber);
-	debug('Initialized device correctly');
+	debug('Initialized device correctly', portId(device));
 	return { iface, endpoint };
 };
 
@@ -295,7 +295,7 @@ const secondStageBoot = async (device: usb.Device, endpoint: usb.Endpoint) => {
 	}
 	const bootMessage = createBootMessageBuffer(bootcodeBuffer.length);
 	await epWrite(bootMessage, device, endpoint);
-	debug(`Writing ${bootMessage.length} bytes`);
+	debug(`Writing ${bootMessage.length} bytes`, portId(device));
 	await epWrite(bootcodeBuffer, device, endpoint);
 	// raspberrypi's sample code has a sleep(1) here, but it looks like it isn't required.
 	const data = await epRead(device, RETURN_CODE_LENGTH);
@@ -410,17 +410,18 @@ export class UsbbootScanner extends EventEmitter {
 		try {
 			const { iface, endpoint } = initializeDevice(device);
 			if (device.deviceDescriptor.iSerialNumber === 0) {
-				debug('Sending bootcode.bin');
+				debug('Sending bootcode.bin', portId(device));
 				this.step(device, 0);
 				await secondStageBoot(device, endpoint);
 				// The device will now detach and reattach with iSerialNumber 1.
 				// This takes approximately 1.5 seconds
 			} else {
-				debug('Second stage boot server');
+				debug('Second stage boot server', portId(device));
 				await this.fileServer(device, endpoint, 2);
 			}
 			device.close();
 		} catch (error) {
+			debug('error', error, portId(device));
 			this.remove(device);
 		}
 	}
@@ -429,8 +430,8 @@ export class UsbbootScanner extends EventEmitter {
 		if (!isUsbBootCapableUSBDevice(device)) {
 			return;
 		}
-		debug('detach', portId(device));
 		const step = (device.deviceDescriptor.iSerialNumber === 0) ? 1 : 40;
+		debug('detach', portId(device), step);
 		this.step(device, step);
 		// This timeout is here to differentiate between the device resetting and the device being unplugged
 		// If the step didn't changed in 5 seconds, we assume the device was unplugged.
@@ -462,11 +463,11 @@ export class UsbbootScanner extends EventEmitter {
 				continue;
 			}
 			const message = parseFileMessageBuffer(data);
-			debug('Received message', FileMessageCommand[message.command], message.filename);
+			debug('Received message', FileMessageCommand[message.command], message.filename, portId(device));
 			if ((message.command === FileMessageCommand.GetFileSize) || (message.command === FileMessageCommand.ReadFile)) {
 				const buffer = await getFileBuffer(message.filename);
 				if (buffer === undefined) {
-					debug(`Couldn't find ${message.filename}`);
+					debug(`Couldn't find ${message.filename}`, portId(device));
 					await sendSize(device, 0);
 				} else {
 					if (message.command === FileMessageCommand.GetFileSize) {
@@ -479,7 +480,7 @@ export class UsbbootScanner extends EventEmitter {
 				break;
 			}
 		}
-		debug('File server done');
+		debug('File server done', portId(device));
 	}
 }
 
