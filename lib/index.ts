@@ -2,8 +2,6 @@
  * This work is heavily based on https://github.com/raspberrypi/usbboot
  * Copyright 2016 Raspberry Pi Foundation
  */
-
-import { Mutex } from 'async-mutex';
 import { delay, fromCallback, promisify } from 'bluebird';
 import * as _debug from 'debug';
 import { EventEmitter } from 'events';
@@ -11,11 +9,11 @@ import { readFile as readFile_ } from 'fs';
 import * as Path from 'path';
 import * as usb from 'usb';
 
-const mutex = new Mutex();
-
 const readFile = promisify(readFile_);
 
 const debug = _debug('node-raspberrypi-usbboot');
+
+const TRANSFER_BLOCK_SIZE = 1024 ** 2;
 
 // The equivalent of a NULL buffer, given that node-usb complains
 // if the data argument is not an instance of Buffer
@@ -222,15 +220,21 @@ const sendSize = async (device: usb.Device, size: number): Promise<void> => {
 	);
 };
 
+function* chunks(buffer: Buffer, size: number) {
+	for (let start = 0; start < buffer.length; start += size) {
+		yield buffer.slice(start, start + size);
+	}
+}
+
 const epWrite = async (buffer: Buffer, device: usb.Device, endpoint: usb.Endpoint) => {
-	const release = await mutex.acquire();
 	await sendSize(device, buffer.length);
 	if (buffer.length > 0) {
-		await fromCallback((callback) => {
-			endpoint.transfer(buffer, callback);
-		});
+		for (const chunk of chunks(buffer, TRANSFER_BLOCK_SIZE)) {
+			await fromCallback((callback) => {
+				endpoint.transfer(chunk, callback);
+			});
+		}
 	}
-	release();
 };
 
 const epRead = async (device: usb.Device, bytesToRead: number): Promise<Buffer> => {
