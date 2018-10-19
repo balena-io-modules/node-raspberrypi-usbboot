@@ -204,6 +204,7 @@ const initializeDevice = (device: usb.Device): { iface: usb.Interface, endpoint:
 		endpointNumber = 3;
 	}
 	const iface = device.interface(interfaceNumber);
+	iface.claim();
 	const endpoint = iface.endpoint(endpointNumber);
 	debug('Initialized device correctly', portId(device));
 	return { iface, endpoint };
