@@ -74,7 +74,8 @@ const CONTROL_TRANSFER_INDEX_RIGHT_BIT_SHIFT = 16;
 /**
  * @summary The size of the usbboot file message
  */
-const FILE_MESSAGE_SIZE = FILE_MESSAGE_COMMAND_SIZE + FILE_MESSAGE_FILE_NAME_SIZE;
+const FILE_MESSAGE_SIZE =
+	FILE_MESSAGE_COMMAND_SIZE + FILE_MESSAGE_FILE_NAME_SIZE;
 
 /**
  * @summary The usbboot return code that represents success
@@ -98,7 +99,7 @@ const USB_PRODUCT_ID_BCM2710_BOOT = 0x2764;
 
 // When the pi reboots in mass storage mode, it has this product id
 const USB_VENDOR_ID_NETCHIP_TECHNOLOGY = 0x0525;
-const USB_PRODUCT_ID_POCKETBOOK_PRO_903 = 0Xa4a5;
+const USB_PRODUCT_ID_POCKETBOOK_PRO_903 = 0xa4a5;
 
 // Delay in ms after which we consider that the device was unplugged (not resetted)
 const DEVICE_UNPLUG_TIMEOUT = 5000;
@@ -127,13 +128,17 @@ const getFilename = (fileMessageBuffer: Buffer): string => {
 	if (end === -1) {
 		end = fileMessageBuffer.length;
 	}
-	return fileMessageBuffer.slice(FILE_MESSAGE_FILE_NAME_OFFSET, end).toString('ascii');
+	return fileMessageBuffer
+		.slice(FILE_MESSAGE_FILE_NAME_OFFSET, end)
+		.toString('ascii');
 };
 
 /**
  * @summary Parse a file message buffer from a device
  */
-const parseFileMessageBuffer = (fileMessageBuffer: Buffer): { command: FileMessageCommand, filename: string } => {
+const parseFileMessageBuffer = (
+	fileMessageBuffer: Buffer,
+): { command: FileMessageCommand; filename: string } => {
 	let command = getCommand(fileMessageBuffer);
 	const filename = getFilename(fileMessageBuffer);
 	// A blank file name can also mean "done"
@@ -158,45 +163,50 @@ const performControlTransfer = async (
 ) => {
 	const previousTimeout = device.timeout;
 	device.timeout = USB_CONTROL_TRANSFER_TIMEOUT_MS;
-	const result = await fromCallback((callback: (error: Error | null, data?: Buffer) => void) => {
-		device.controlTransfer(
-			bmRequestType,
-			bRequest,
-			wValue,
-			wIndex,
-			dataOrLength,
-			callback,
-		);
-	});
+	const result = await fromCallback(
+		(callback: (error: Error | null, data?: Buffer) => void) => {
+			device.controlTransfer(
+				bmRequestType,
+				bRequest,
+				wValue,
+				wIndex,
+				dataOrLength,
+				callback,
+			);
+		},
+	);
 	device.timeout = previousTimeout;
 	return result;
 };
 
 const isUsbBootCapableUSBDevice = (device: usb.Device): boolean => {
 	return (
-		(device.deviceDescriptor.idVendor === USB_VENDOR_ID_BROADCOM_CORPORATION) &&
-		(
-			(device.deviceDescriptor.idProduct === USB_PRODUCT_ID_BCM2708_BOOT) ||
-			(device.deviceDescriptor.idProduct === USB_PRODUCT_ID_BCM2710_BOOT)
-		)
+		device.deviceDescriptor.idVendor === USB_VENDOR_ID_BROADCOM_CORPORATION &&
+		(device.deviceDescriptor.idProduct === USB_PRODUCT_ID_BCM2708_BOOT ||
+			device.deviceDescriptor.idProduct === USB_PRODUCT_ID_BCM2710_BOOT)
 	);
 };
 
 const isRaspberryPiInMassStorageMode = (device: usb.Device): boolean => {
 	return (
-		(device.deviceDescriptor.idVendor === USB_VENDOR_ID_NETCHIP_TECHNOLOGY) &&
-		(device.deviceDescriptor.idProduct === USB_PRODUCT_ID_POCKETBOOK_PRO_903)
+		device.deviceDescriptor.idVendor === USB_VENDOR_ID_NETCHIP_TECHNOLOGY &&
+		device.deviceDescriptor.idProduct === USB_PRODUCT_ID_POCKETBOOK_PRO_903
 	);
 };
 
-const initializeDevice = (device: usb.Device): { iface: usb.Interface, endpoint: usb.Endpoint } => {
+const initializeDevice = (
+	device: usb.Device,
+): { iface: usb.Interface; endpoint: usb.Endpoint } => {
 	// interface is a reserved keyword in TypeScript so we use iface
 	device.open();
 	// Handle 2837 where it can start with two interfaces, the first is mass storage
 	// the second is the vendor interface for programming
 	let interfaceNumber;
 	let endpointNumber;
-	if (device._configDescriptor.bNumInterfaces === USB_ENDPOINT_INTERFACES_SOC_BCM2835) {
+	if (
+		device._configDescriptor.bNumInterfaces ===
+		USB_ENDPOINT_INTERFACES_SOC_BCM2835
+	) {
 		interfaceNumber = 0;
 		endpointNumber = 1;
 	} else {
@@ -227,18 +237,25 @@ function* chunks(buffer: Buffer, size: number) {
 	}
 }
 
-const epWrite = async (buffer: Buffer, device: usb.Device, endpoint: usb.Endpoint) => {
+const epWrite = async (
+	buffer: Buffer,
+	device: usb.Device,
+	endpoint: usb.Endpoint,
+) => {
 	await sendSize(device, buffer.length);
 	if (buffer.length > 0) {
 		for (const chunk of chunks(buffer, TRANSFER_BLOCK_SIZE)) {
-			await fromCallback((callback) => {
+			await fromCallback(callback => {
 				endpoint.transfer(chunk, callback);
 			});
 		}
 	}
 };
 
-const epRead = async (device: usb.Device, bytesToRead: number): Promise<Buffer> => {
+const epRead = async (
+	device: usb.Device,
+	bytesToRead: number,
+): Promise<Buffer> => {
 	return await performControlTransfer(
 		device,
 		usb.LIBUSB_REQUEST_TYPE_VENDOR | usb.LIBUSB_ENDPOINT_IN,
@@ -253,14 +270,13 @@ const getDeviceId = (device: usb.Device): string => {
 	return `${device.busNumber}:${device.deviceAddress}`;
 };
 
-const safeReadFile = async (filename: string): Promise<Buffer|undefined> => {
+const safeReadFile = async (filename: string): Promise<Buffer | undefined> => {
 	try {
 		return await readFile(Path.join(__dirname, '..', 'blobs', filename));
-	} catch (e) {
-	}
+	} catch (e) {}
 };
 
-const getFileBuffer = async (filename: string): Promise<Buffer|undefined> => {
+const getFileBuffer = async (filename: string): Promise<Buffer | undefined> => {
 	let buffer = await safeReadFile(filename);
 	if (buffer === undefined) {
 		buffer = await safeReadFile(Path.join('raspberrypi', filename));
@@ -290,11 +306,15 @@ const getFileBuffer = async (filename: string): Promise<Buffer|undefined> => {
  *   we don't make use of in this implementation
  */
 const createBootMessageBuffer = (bootCodeBufferLength: number): Buffer => {
-	const bootMessageBufferSize = BOOT_MESSAGE_BOOTCODE_LENGTH_SIZE + BOOT_MESSAGE_SIGNATURE_SIZE;
+	const bootMessageBufferSize =
+		BOOT_MESSAGE_BOOTCODE_LENGTH_SIZE + BOOT_MESSAGE_SIGNATURE_SIZE;
 	// Buffers are automatically filled with zero bytes
 	const bootMessageBuffer = Buffer.alloc(bootMessageBufferSize);
 	// The bootcode length should be stored in 4 big-endian bytes
-	bootMessageBuffer.writeInt32BE(bootCodeBufferLength, BOOT_MESSAGE_BOOTCODE_LENGTH_OFFSET);
+	bootMessageBuffer.writeInt32BE(
+		bootCodeBufferLength,
+		BOOT_MESSAGE_BOOTCODE_LENGTH_OFFSET,
+	);
 	return bootMessageBuffer;
 };
 
@@ -311,7 +331,9 @@ const secondStageBoot = async (device: usb.Device, endpoint: usb.Endpoint) => {
 	const data = await epRead(device, RETURN_CODE_LENGTH);
 	const returnCode = data.readInt32LE(0);
 	if (returnCode !== RETURN_CODE_SUCCESS) {
-		throw new Error(`Couldn't write the bootcode, got return code ${returnCode} from device`);
+		throw new Error(
+			`Couldn't write the bootcode, got return code ${returnCode} from device`,
+		);
 	}
 };
 
@@ -408,7 +430,10 @@ export class UsbbootScanner extends EventEmitter {
 	}
 
 	private async attachDevice(device: usb.Device): Promise<void> {
-		if (isRaspberryPiInMassStorageMode(device) && this.usbbootDevices.has(portId(device))) {
+		if (
+			isRaspberryPiInMassStorageMode(device) &&
+			this.usbbootDevices.has(portId(device))
+		) {
 			this.step(device, 41);
 			return;
 		}
@@ -440,24 +465,31 @@ export class UsbbootScanner extends EventEmitter {
 		if (!isUsbBootCapableUSBDevice(device)) {
 			return;
 		}
-		const step = (device.deviceDescriptor.iSerialNumber === 0) ? 1 : 40;
+		const step = device.deviceDescriptor.iSerialNumber === 0 ? 1 : 40;
 		debug('detach', portId(device), step);
 		this.step(device, step);
 		// This timeout is here to differentiate between the device resetting and the device being unplugged
 		// If the step didn't changed in 5 seconds, we assume the device was unplugged.
-		setTimeout(
-			() => {
-				const usbbootDevice = this.get(device);
-				if ((usbbootDevice !== undefined) && (usbbootDevice.step === step)) {
-					debug('device', portId(device), 'did not reattached after', DEVICE_UNPLUG_TIMEOUT, 'ms.');
-					this.remove(device);
-				}
-			},
-			DEVICE_UNPLUG_TIMEOUT,
-		);
+		setTimeout(() => {
+			const usbbootDevice = this.get(device);
+			if (usbbootDevice !== undefined && usbbootDevice.step === step) {
+				debug(
+					'device',
+					portId(device),
+					'did not reattached after',
+					DEVICE_UNPLUG_TIMEOUT,
+					'ms.',
+				);
+				this.remove(device);
+			}
+		}, DEVICE_UNPLUG_TIMEOUT);
 	}
 
-	private async fileServer(device: usb.Device, endpoint: usb.Endpoint, step: number) {
+	private async fileServer(
+		device: usb.Device,
+		endpoint: usb.Endpoint,
+		step: number,
+	) {
 		while (true) {
 			this.step(device, step);
 			step += 1;
@@ -465,7 +497,10 @@ export class UsbbootScanner extends EventEmitter {
 			try {
 				data = await epRead(device, FILE_MESSAGE_SIZE);
 			} catch (error) {
-				if ((error.message === 'LIBUSB_ERROR_NO_DEVICE') || (error.message === 'LIBUSB_ERROR_IO')) {
+				if (
+					error.message === 'LIBUSB_ERROR_NO_DEVICE' ||
+					error.message === 'LIBUSB_ERROR_IO'
+				) {
 					// Drop out if the device goes away
 					break;
 				}
@@ -473,8 +508,16 @@ export class UsbbootScanner extends EventEmitter {
 				continue;
 			}
 			const message = parseFileMessageBuffer(data);
-			debug('Received message', FileMessageCommand[message.command], message.filename, portId(device));
-			if ((message.command === FileMessageCommand.GetFileSize) || (message.command === FileMessageCommand.ReadFile)) {
+			debug(
+				'Received message',
+				FileMessageCommand[message.command],
+				message.filename,
+				portId(device),
+			);
+			if (
+				message.command === FileMessageCommand.GetFileSize ||
+				message.command === FileMessageCommand.ReadFile
+			) {
 				const buffer = await getFileBuffer(message.filename);
 				if (buffer === undefined) {
 					debug(`Couldn't find ${message.filename}`, portId(device));
@@ -493,7 +536,6 @@ export class UsbbootScanner extends EventEmitter {
 		debug('File server done', portId(device));
 	}
 }
-
 
 const portId = (device: usb.Device) => {
 	return `${device.busNumber}-${device.portNumbers.join('.')}`;
