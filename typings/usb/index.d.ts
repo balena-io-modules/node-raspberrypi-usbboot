@@ -48,10 +48,7 @@ declare module 'usb' {
 		transferType: number;
 		timeout: number;
 
-		transfer: (
-			buffer: Buffer,
-			callback: (error: Error | null) => void,
-		) => void;
+		transfer: (buffer: Buffer, callback: (error: Error | null) => void) => void;
 	}
 
 	export class Device {
@@ -82,13 +79,15 @@ declare module 'usb' {
 			desc_index: number,
 			callback: (error: Error | null, result?: string) => void,
 		): void;
-
 	}
 
 	export function getDeviceList(): Device[];
 	// FIXME: this module behaves as an EventEmitter instance, `on` and `removeListener` should return `this`.
 	// Not sure how to express this in a .d.ts file
 	export function on(eventName: string, fn: (device: Device) => void): void;
-	export function removeListener(eventName: string, fn: (device: Device) => void): void;
+	export function removeListener(
+		eventName: string,
+		fn: (device: Device) => void,
+	): void;
 	export function setDebugLevel(level: number): void;
 }
