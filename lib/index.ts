@@ -182,11 +182,21 @@ const performControlTransfer = async (
 	return result;
 };
 
-const isUsbBootCapableUSBDevice = (device: usb.Device): boolean => {
+export const isUsbBootCapableUSBDevice = (
+	idVendor: number,
+	idProduct: number,
+): boolean => {
 	return (
-		device.deviceDescriptor.idVendor === USB_VENDOR_ID_BROADCOM_CORPORATION &&
-		(device.deviceDescriptor.idProduct === USB_PRODUCT_ID_BCM2708_BOOT ||
-			device.deviceDescriptor.idProduct === USB_PRODUCT_ID_BCM2710_BOOT)
+		idVendor === USB_VENDOR_ID_BROADCOM_CORPORATION &&
+		(idProduct === USB_PRODUCT_ID_BCM2708_BOOT ||
+			idProduct === USB_PRODUCT_ID_BCM2710_BOOT)
+	);
+};
+
+const isUsbBootCapableUSBDevice$ = (device: usb.Device): boolean => {
+	return isUsbBootCapableUSBDevice(
+		device.deviceDescriptor.idVendor,
+		device.deviceDescriptor.idProduct,
 	);
 };
 
@@ -448,7 +458,7 @@ export class UsbbootScanner extends EventEmitter {
 			this.step(device, 41);
 			return;
 		}
-		if (!isUsbBootCapableUSBDevice(device)) {
+		if (!isUsbBootCapableUSBDevice$(device)) {
 			return;
 		}
 		debug('Found serial number', device.deviceDescriptor.iSerialNumber);
@@ -473,7 +483,7 @@ export class UsbbootScanner extends EventEmitter {
 	}
 
 	private detachDevice(device: usb.Device): void {
-		if (!isUsbBootCapableUSBDevice(device)) {
+		if (!isUsbBootCapableUSBDevice$(device)) {
 			return;
 		}
 		const step = device.deviceDescriptor.iSerialNumber === 0 ? 1 : 40;
