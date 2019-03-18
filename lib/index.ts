@@ -92,8 +92,11 @@ const RETURN_CODE_LENGTH = 4;
 /**
  * @summary The timeout for USB control transfers, in milliseconds
  */
-// In node-usb, 0 means "infinite" timeout
-const USB_CONTROL_TRANSFER_TIMEOUT_MS = 0;
+const USB_CONTROL_TRANSFER_TIMEOUT_MS = 10000;
+/**
+ * @summary The timeout for USB bulk transfers, in milliseconds
+ */
+const USB_BULK_TRANSFER_TIMEOUT_MS = 10000;
 
 const USB_ENDPOINT_INTERFACES_SOC_BCM2835 = 1;
 const USB_VENDOR_ID_BROADCOM_CORPORATION = 0x0a5c;
@@ -253,17 +256,37 @@ function* chunks(buffer: Buffer, size: number) {
 	}
 }
 
+const transfer = async (endpoint: usb.OutEndpoint, chunk: Buffer) => {
+	endpoint.timeout = USB_BULK_TRANSFER_TIMEOUT_MS;
+	for (let tries = 0; tries < 3; tries++) {
+		if (tries > 0) {
+			debug('Transfer stall, retrying');
+		}
+		try {
+			await fromCallback(callback => {
+				endpoint.transfer(chunk, callback);
+			});
+			return;
+		} catch (error) {
+			if (error.errno === usb.LIBUSB_TRANSFER_STALL) {
+				continue;
+			}
+			throw error;
+		}
+	}
+};
+
 const epWrite = async (
 	buffer: Buffer,
 	device: usb.Device,
 	endpoint: usb.OutEndpoint,
 ) => {
+	debug('Sending buffer size', buffer.length);
 	await sendSize(device, buffer.length);
 	if (buffer.length > 0) {
 		for (const chunk of chunks(buffer, TRANSFER_BLOCK_SIZE)) {
-			await fromCallback(callback => {
-				endpoint.transfer(chunk, callback);
-			});
+			debug('Sending chunk of size', chunk.length);
+			await transfer(endpoint, chunk);
 		}
 	}
 };
@@ -396,6 +419,15 @@ export class UsbbootScanner extends EventEmitter {
 		super();
 		this.boundAttachDevice = this.attachDevice.bind(this);
 		this.boundDetachDevice = this.detachDevice.bind(this);
+
+		// This is an undocumented property
+		// @ts-ignore
+		if (usb.INIT_ERROR) {
+			throw new Error(
+				// @ts-ignore
+				`USB failed to initialize, libusb_init returned ${usb.INIT_ERROR}`,
+			);
+		}
 	}
 
 	public start(): void {
