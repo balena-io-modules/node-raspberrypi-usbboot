@@ -164,7 +164,7 @@ const performControlTransfer = async (
 	const previousTimeout = device.timeout;
 	device.timeout = USB_CONTROL_TRANSFER_TIMEOUT_MS;
 	const result = await fromCallback(
-		(callback: (error: Error | null, data?: Buffer) => void) => {
+		(callback: (error?: Error | null, data?: Buffer) => void) => {
 			device.controlTransfer(
 				bmRequestType,
 				bRequest,
@@ -196,7 +196,7 @@ const isRaspberryPiInMassStorageMode = (device: usb.Device): boolean => {
 
 const initializeDevice = (
 	device: usb.Device,
-): { iface: usb.Interface; endpoint: usb.Endpoint } => {
+): { iface: usb.Interface; endpoint: usb.OutEndpoint } => {
 	// interface is a reserved keyword in TypeScript so we use iface
 	device.open();
 	// Handle 2837 where it can start with two interfaces, the first is mass storage
@@ -204,7 +204,7 @@ const initializeDevice = (
 	let interfaceNumber;
 	let endpointNumber;
 	if (
-		device._configDescriptor.bNumInterfaces ===
+		device.configDescriptor.bNumInterfaces ===
 		USB_ENDPOINT_INTERFACES_SOC_BCM2835
 	) {
 		interfaceNumber = 0;
@@ -216,6 +216,9 @@ const initializeDevice = (
 	const iface = device.interface(interfaceNumber);
 	iface.claim();
 	const endpoint = iface.endpoint(endpointNumber);
+	if (!(endpoint instanceof usb.OutEndpoint)) {
+		throw new Error('endpoint is not an usb.OutEndpoint');
+	}
 	debug('Initialized device correctly', portId(device));
 	return { iface, endpoint };
 };
@@ -240,7 +243,7 @@ function* chunks(buffer: Buffer, size: number) {
 const epWrite = async (
 	buffer: Buffer,
 	device: usb.Device,
-	endpoint: usb.Endpoint,
+	endpoint: usb.OutEndpoint,
 ) => {
 	await sendSize(device, buffer.length);
 	if (buffer.length > 0) {
@@ -318,7 +321,10 @@ const createBootMessageBuffer = (bootCodeBufferLength: number): Buffer => {
 	return bootMessageBuffer;
 };
 
-const secondStageBoot = async (device: usb.Device, endpoint: usb.Endpoint) => {
+const secondStageBoot = async (
+	device: usb.Device,
+	endpoint: usb.OutEndpoint,
+) => {
 	const bootcodeBuffer = await getFileBuffer('bootcode.bin');
 	if (bootcodeBuffer === undefined) {
 		throw new Error("Can't find bootcode.bin");
@@ -487,7 +493,7 @@ export class UsbbootScanner extends EventEmitter {
 
 	private async fileServer(
 		device: usb.Device,
-		endpoint: usb.Endpoint,
+		endpoint: usb.OutEndpoint,
 		step: number,
 	) {
 		while (true) {

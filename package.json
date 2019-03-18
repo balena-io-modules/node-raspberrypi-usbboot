@@ -5,8 +5,8 @@
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "scripts": {
-    "prettier": "prettier --config ./node_modules/resin-lint/config/.prettierrc --write \"lib/**/*.ts\" \"typings/**/*.ts\"",
-    "lint": "resin-lint --typescript lib/*.ts typings/**/*.d.ts",
+    "prettier": "prettier --config ./node_modules/resin-lint/config/.prettierrc --write \"lib/**/*.ts\"",
+    "lint": "resin-lint --typescript lib/*.ts",
     "build": "npm run lint && rimraf build && tsc",
     "prepublish": "npm run build"
   },
@@ -26,6 +26,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@types/node": "^6.0.112",
+    "@types/usb": "^1.5.1",
     "debug": "^3.1.0",
     "usb": "github:resin-io/node-usb#1.3.5"
   },
