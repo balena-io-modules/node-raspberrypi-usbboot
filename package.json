@@ -33,7 +33,7 @@
   "devDependencies": {
     "@types/bluebird": "^3.5.20",
     "@types/debug": "0.0.30",
-    "resin-lint": "^2.0.1",
+    "resin-lint": "^3.0.1",
     "rimraf": "^2.6.2",
     "ts-node": "^6.0.3",
     "typescript": "^2.9.1"
