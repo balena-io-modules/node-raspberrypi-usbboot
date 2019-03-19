@@ -517,7 +517,7 @@ export class UsbbootScanner extends EventEmitter {
 		debug('Found serial number', device.deviceDescriptor.iSerialNumber);
 		debug('port id', devicePortId(device));
 		try {
-			const { iface, endpoint } = initializeDevice(device);
+			const { endpoint } = initializeDevice(device);
 			if (device.deviceDescriptor.iSerialNumber === 0) {
 				debug('Sending bootcode.bin', devicePortId(device));
 				this.step(device, 0);
