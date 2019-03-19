@@ -16,6 +16,8 @@ const readFile = promisify(readFile_);
 
 const debug = _debug('node-raspberrypi-usbboot');
 
+const POLLING_INTERVAL_MS = 2000;
+
 const TRANSFER_BLOCK_SIZE = 1024 ** 2;
 
 // The equivalent of a NULL buffer, given that node-usb complains
@@ -414,6 +416,11 @@ export class UsbbootScanner extends EventEmitter {
 	private usbbootDevices = new Map<string, UsbbootDevice>();
 	private boundAttachDevice: (device: usb.Device) => Promise<void>;
 	private boundDetachDevice: (device: usb.Device) => void;
+	private interval: number | undefined;
+	// We use both events ('attach' and 'detach') and polling getDeviceList() on usb.
+	// We don't know which one will trigger the this.attachDevice call.
+	// So we keep track of attached devices ids in attachedDeviceIds to not run it twice.
+	private attachedDeviceIds = new Set<string>();
 
 	constructor() {
 		super();
@@ -432,8 +439,10 @@ export class UsbbootScanner extends EventEmitter {
 
 	public start(): void {
 		debug('Waiting for BCM2835/6/7');
+
 		// Prepare already connected devices
 		usb.getDeviceList().map(this.boundAttachDevice);
+
 		// At this point all devices from `usg.getDeviceList()` above
 		// have had an 'attach' event emitted if they were raspberry pis.
 		this.emit('ready');
@@ -441,11 +450,18 @@ export class UsbbootScanner extends EventEmitter {
 		usb.on('attach', this.boundAttachDevice);
 		// Watch for devices detaching
 		usb.on('detach', this.boundDetachDevice);
+
+		// ts-ignore because of a confusion between NodeJS.Timer and number
+		// @ts-ignore
+		this.interval = setInterval(() => {
+			usb.getDeviceList().forEach(this.boundAttachDevice);
+		}, POLLING_INTERVAL_MS);
 	}
 
 	public stop(): void {
 		usb.removeListener('attach', this.boundAttachDevice);
 		usb.removeListener('detach', this.boundDetachDevice);
+		clearInterval(this.interval);
 		this.usbbootDevices.clear();
 	}
 
@@ -483,6 +499,11 @@ export class UsbbootScanner extends EventEmitter {
 	}
 
 	private async attachDevice(device: usb.Device): Promise<void> {
+		if (this.attachedDeviceIds.has(getDeviceId(device))) {
+			return;
+		}
+		this.attachedDeviceIds.add(getDeviceId(device));
+
 		if (
 			isRaspberryPiInMassStorageMode(device) &&
 			this.usbbootDevices.has(devicePortId(device))
@@ -515,6 +536,7 @@ export class UsbbootScanner extends EventEmitter {
 	}
 
 	private detachDevice(device: usb.Device): void {
+		this.attachedDeviceIds.delete(getDeviceId(device));
 		if (!isUsbBootCapableUSBDevice$(device)) {
 			return;
 		}
@@ -591,5 +613,9 @@ export class UsbbootScanner extends EventEmitter {
 }
 
 const devicePortId = (device: usb.Device) => {
-	return `${device.busNumber}-${device.portNumbers.join('.')}`;
+	let result = `${device.busNumber}`;
+	if (device.portNumbers !== undefined) {
+		result += `-${device.portNumbers.join('.')}`;
+	}
+	return result;
 };
