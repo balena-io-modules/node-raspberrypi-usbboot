@@ -16,6 +16,8 @@ const readFile = promisify(readFile_);
 
 const debug = _debug('node-raspberrypi-usbboot');
 
+const POLLING_INTERVAL_MS = 2000;
+
 const TRANSFER_BLOCK_SIZE = 1024 ** 2;
 
 // The equivalent of a NULL buffer, given that node-usb complains
@@ -92,8 +94,11 @@ const RETURN_CODE_LENGTH = 4;
 /**
  * @summary The timeout for USB control transfers, in milliseconds
  */
-// In node-usb, 0 means "infinite" timeout
-const USB_CONTROL_TRANSFER_TIMEOUT_MS = 0;
+const USB_CONTROL_TRANSFER_TIMEOUT_MS = 10000;
+/**
+ * @summary The timeout for USB bulk transfers, in milliseconds
+ */
+const USB_BULK_TRANSFER_TIMEOUT_MS = 10000;
 
 const USB_ENDPOINT_INTERFACES_SOC_BCM2835 = 1;
 const USB_VENDOR_ID_BROADCOM_CORPORATION = 0x0a5c;
@@ -253,17 +258,37 @@ function* chunks(buffer: Buffer, size: number) {
 	}
 }
 
+const transfer = async (endpoint: usb.OutEndpoint, chunk: Buffer) => {
+	endpoint.timeout = USB_BULK_TRANSFER_TIMEOUT_MS;
+	for (let tries = 0; tries < 3; tries++) {
+		if (tries > 0) {
+			debug('Transfer stall, retrying');
+		}
+		try {
+			await fromCallback(callback => {
+				endpoint.transfer(chunk, callback);
+			});
+			return;
+		} catch (error) {
+			if (error.errno === usb.LIBUSB_TRANSFER_STALL) {
+				continue;
+			}
+			throw error;
+		}
+	}
+};
+
 const epWrite = async (
 	buffer: Buffer,
 	device: usb.Device,
 	endpoint: usb.OutEndpoint,
 ) => {
+	debug('Sending buffer size', buffer.length);
 	await sendSize(device, buffer.length);
 	if (buffer.length > 0) {
 		for (const chunk of chunks(buffer, TRANSFER_BLOCK_SIZE)) {
-			await fromCallback(callback => {
-				endpoint.transfer(chunk, callback);
-			});
+			debug('Sending chunk of size', chunk.length);
+			await transfer(endpoint, chunk);
 		}
 	}
 };
@@ -391,17 +416,33 @@ export class UsbbootScanner extends EventEmitter {
 	private usbbootDevices = new Map<string, UsbbootDevice>();
 	private boundAttachDevice: (device: usb.Device) => Promise<void>;
 	private boundDetachDevice: (device: usb.Device) => void;
+	private interval: number | undefined;
+	// We use both events ('attach' and 'detach') and polling getDeviceList() on usb.
+	// We don't know which one will trigger the this.attachDevice call.
+	// So we keep track of attached devices ids in attachedDeviceIds to not run it twice.
+	private attachedDeviceIds = new Set<string>();
 
 	constructor() {
 		super();
 		this.boundAttachDevice = this.attachDevice.bind(this);
 		this.boundDetachDevice = this.detachDevice.bind(this);
+
+		// This is an undocumented property
+		// @ts-ignore
+		if (usb.INIT_ERROR) {
+			throw new Error(
+				// @ts-ignore
+				`USB failed to initialize, libusb_init returned ${usb.INIT_ERROR}`,
+			);
+		}
 	}
 
 	public start(): void {
 		debug('Waiting for BCM2835/6/7');
+
 		// Prepare already connected devices
 		usb.getDeviceList().map(this.boundAttachDevice);
+
 		// At this point all devices from `usg.getDeviceList()` above
 		// have had an 'attach' event emitted if they were raspberry pis.
 		this.emit('ready');
@@ -409,11 +450,18 @@ export class UsbbootScanner extends EventEmitter {
 		usb.on('attach', this.boundAttachDevice);
 		// Watch for devices detaching
 		usb.on('detach', this.boundDetachDevice);
+
+		// ts-ignore because of a confusion between NodeJS.Timer and number
+		// @ts-ignore
+		this.interval = setInterval(() => {
+			usb.getDeviceList().forEach(this.boundAttachDevice);
+		}, POLLING_INTERVAL_MS);
 	}
 
 	public stop(): void {
 		usb.removeListener('attach', this.boundAttachDevice);
 		usb.removeListener('detach', this.boundDetachDevice);
+		clearInterval(this.interval);
 		this.usbbootDevices.clear();
 	}
 
@@ -451,6 +499,11 @@ export class UsbbootScanner extends EventEmitter {
 	}
 
 	private async attachDevice(device: usb.Device): Promise<void> {
+		if (this.attachedDeviceIds.has(getDeviceId(device))) {
+			return;
+		}
+		this.attachedDeviceIds.add(getDeviceId(device));
+
 		if (
 			isRaspberryPiInMassStorageMode(device) &&
 			this.usbbootDevices.has(devicePortId(device))
@@ -464,7 +517,7 @@ export class UsbbootScanner extends EventEmitter {
 		debug('Found serial number', device.deviceDescriptor.iSerialNumber);
 		debug('port id', devicePortId(device));
 		try {
-			const { iface, endpoint } = initializeDevice(device);
+			const { endpoint } = initializeDevice(device);
 			if (device.deviceDescriptor.iSerialNumber === 0) {
 				debug('Sending bootcode.bin', devicePortId(device));
 				this.step(device, 0);
@@ -483,6 +536,7 @@ export class UsbbootScanner extends EventEmitter {
 	}
 
 	private detachDevice(device: usb.Device): void {
+		this.attachedDeviceIds.delete(getDeviceId(device));
 		if (!isUsbBootCapableUSBDevice$(device)) {
 			return;
 		}
@@ -559,5 +613,9 @@ export class UsbbootScanner extends EventEmitter {
 }
 
 const devicePortId = (device: usb.Device) => {
-	return `${device.busNumber}-${device.portNumbers.join('.')}`;
+	let result = `${device.busNumber}`;
+	if (device.portNumbers !== undefined) {
+		result += `-${device.portNumbers.join('.')}`;
+	}
+	return result;
 };
