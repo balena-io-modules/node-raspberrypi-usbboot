@@ -426,15 +426,6 @@ export class UsbbootScanner extends EventEmitter {
 		super();
 		this.boundAttachDevice = this.attachDevice.bind(this);
 		this.boundDetachDevice = this.detachDevice.bind(this);
-
-		// This is an undocumented property
-		// @ts-ignore
-		if (usb.INIT_ERROR) {
-			throw new Error(
-				// @ts-ignore
-				`USB failed to initialize, libusb_init returned ${usb.INIT_ERROR}`,
-			);
-		}
 	}
 
 	public start(): void {
