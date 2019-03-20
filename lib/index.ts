@@ -428,8 +428,10 @@ export class UsbbootScanner extends EventEmitter {
 		this.boundDetachDevice = this.detachDevice.bind(this);
 
 		// This is an undocumented property
+		// Code -99 means that there is no available USB interface,
+		// in which case it would be an expected error in i.e. CI.
 		// @ts-ignore
-		if (usb.INIT_ERROR) {
+		if (usb.INIT_ERROR && usb.INIT_ERROR !== -99) {
 			throw new Error(
 				// @ts-ignore
 				`USB failed to initialize, libusb_init returned ${usb.INIT_ERROR}`,
