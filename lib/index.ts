@@ -5,12 +5,12 @@
 
 // tslint:disable:no-bitwise
 
+import * as usb from '@balena.io/usb';
 import { delay, fromCallback, promisify } from 'bluebird';
 import * as _debug from 'debug';
 import { EventEmitter } from 'events';
 import { readFile as readFile_ } from 'fs';
 import * as Path from 'path';
-import * as usb from 'usb';
 
 const readFile = promisify(readFile_);
 
