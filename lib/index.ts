@@ -265,7 +265,7 @@ const transfer = async (endpoint: usb.OutEndpoint, chunk: Buffer) => {
 			debug('Transfer stall, retrying');
 		}
 		try {
-			await fromCallback(callback => {
+			await fromCallback((callback) => {
 				endpoint.transfer(chunk, callback);
 			});
 			return;
