@@ -265,7 +265,7 @@ const transfer = async (endpoint: usb.OutEndpoint, chunk: Buffer) => {
 			debug('Transfer stall, retrying');
 		}
 		try {
-			await fromCallback(callback => {
+			await fromCallback((callback) => {
 				endpoint.transfer(chunk, callback);
 			});
 			return;
@@ -600,6 +600,14 @@ export class UsbbootScanner extends EventEmitter {
 			}
 		}
 		debug('File server done', devicePortId(device));
+		// On some computers, the rpi won't detach at this point.
+		// If you try communicating with it, it will error, detach and reattach as expected.
+		await delay(2000);
+		try {
+			device.open();
+		} catch {
+			// We expect LIBUSB_ERROR_IO here
+		}
 	}
 }
 
