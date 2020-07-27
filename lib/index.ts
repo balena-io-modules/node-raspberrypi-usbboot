@@ -6,11 +6,31 @@
 // tslint:disable:no-bitwise
 
 import * as usb from '@balena.io/usb';
-import { delay, fromCallback, promisify } from 'bluebird';
 import * as _debug from 'debug';
 import { EventEmitter } from 'events';
 import { readFile as readFile_ } from 'fs';
 import * as Path from 'path';
+import { promisify } from 'util';
+
+async function delay(ms: number) {
+	await new Promise((resolve) => {
+		setTimeout(resolve, ms);
+	});
+}
+
+function fromCallback<T>(
+	fn: (callback: (error?: Error | null, result?: T) => void) => void,
+): Promise<T> {
+	return new Promise((resolve, reject) => {
+		fn((error?: Error | null, result?: T) => {
+			if (error == null) {
+				resolve(result);
+			} else {
+				reject(error);
+			}
+		});
+	});
+}
 
 const readFile = promisify(readFile_);
 
