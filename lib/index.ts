@@ -22,7 +22,7 @@ function fromCallback<T>(
 	fn: (callback: (error?: Error | null, result?: T) => void) => void,
 ): Promise<T> {
 	return new Promise((resolve, reject) => {
-		fn((error?: Error | null, result?: T) => {
+		fn((error: Error | null, result: T) => {
 			if (error == null) {
 				resolve(result);
 			} else {
