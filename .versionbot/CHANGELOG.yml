@@ -1,0 +1,275 @@
+- version: 0.2.9
+  date: 2020-07-27T17:58:27Z
+  commits:
+    - hash: fea90a0650f8bfe997c6bb1e6e163ce10bcb7bc7
+      author: Alexis Svinartchouk
+      footers:
+        change-type: patch
+      subject: Remove bluebird dependency
+      body:
+- version: 0.2.8
+  date: 2020-06-11T16:08:10Z
+  commits:
+    - hash: 5c8b284cb023406acfc7fcd04760e282247d6e2c
+      author: Alexis Svinartchouk
+      footers:
+        change-type: patch
+      subject: Fix fin not detaching after receiving files on some computers
+      body:
+    - hash: 4c722731278ec51ca5cc45eea541d36113f96428
+      author: Alexis Svinartchouk
+      footers:
+        change-type: patch
+      subject: Update resin-lint to @balena/lint
+      body:
+    - hash: 4e44ad6ddf66c8d00c9611d5e85bdeccc5baa1c0
+      author: Alexis Svinartchouk
+      footers:
+        change-type: patch
+      subject: Update dependencies, target es2018
+      body:
+    - hash: 1ddae09dee43c38dd28b5d6cf4afd8f1f7e0ac38
+      author: Alexis Svinartchouk
+      footers:
+        change-type: patch
+      subject: Add .resinci.yml file
+      body:
+- version: 0.2.7
+  date: 2019-10-15T14:29:16Z
+  commits:
+    - hash: a5fe9e7f826e2efedb3199ceb044c5e0dce840e9
+      author: Alexis Svinartchouk
+      footers:
+        change-type: patch
+      subject: Import @balena.io/usb instead of usb
+      body:
+- version: 0.2.6
+  date: 2019-10-15T12:32:34Z
+  commits:
+    - hash: 029709155dd8c867f4da8dda207c0c7bdcd51b49
+      author: Alexis Svinartchouk
+      footers:
+        change-type: patch
+      subject: Get @balena.io/usb from npm
+      body:
+- version: 0.2.5
+  date: 2019-08-19T11:04:56Z
+  commits:
+    - hash: ee28ff385802930924d0aa9ea455a18b22ebac19
+      author: Alexis Svinartchouk
+      footers:
+        change-type: patch
+      subject: Use balena-io org for node-usb
+      body:
+- version: 0.2.4
+  date: 2019-05-22T17:12:43Z
+  commits:
+    - hash: 39dbdc20be3f72e0e1564afa7289f1538af42429
+      author: Gergely Imreh
+      footers:
+        change-type: patch
+        signed-off-by: Gergely Imreh <imrehg@gmail.com>
+      subject: 'dependencies: bump node-usb to v1.3.10 to enable Node 12 builds'
+      body:
+- version: 0.2.3
+  date: 2019-03-20T14:00:26Z
+  commits:
+    - hash: 148d6c21859d7190a53e77baae49e24ee4d17959
+      author: Juan Cruz Viotti
+      footers:
+        change-type: patch
+        signed-off-by: Juan Cruz Viotti <juan@balena.io>
+      subject: Don't crash on initialization
+      body:
+- version: 0.2.2
+  date: 2019-03-20T11:37:40Z
+  commits:
+    - hash: 55ba821d95b1e1ec8bc3885f8359b6456cfe3147
+      author: Juan Cruz Viotti
+      footers:
+        change-type: patch
+        signed-off-by: Juan Cruz Viotti <juan@balena.io>
+      subject: 'node-usb: Upgrade to v1.3.6'
+      body:
+- version: 0.2.1
+  date: 2019-03-20T10:56:36Z
+  commits:
+    - hash: 106457796ad907786952a72b7ad9b0e55931b0e9
+      author: Juan Cruz Viotti
+      footers:
+        change-type: patch
+      subject: Improve USB boot stability
+      body: |-
+        - Check the `INIT_ERROR` flag when initializing `libusb`
+        - Set a 10 second timeout for transfers
+        - Retry if a bulk transfer stalls
+    - hash: 809d357338ee07d864a159d77a0a3e087b308447
+      author: Juan Cruz Viotti
+      footers:
+        change-type: patch
+      subject: Poll usb.getDeviceList() every 2 seconds.
+      body: |-
+        In some cases the 'attach' event of node-usb is not fired.
+        We run usb.getDeviceList() every second as a workaround.
+    - hash: 23feb062025537a6758192c0eb1fc6f31916a64e
+      author: Alexis Svinartchouk
+      footers:
+        change-type: patch
+      subject: Add noUnusedLocals and noUnusedParameters to tsconfig.json
+      body:
+- version: 0.2.0
+  date: 2019-03-18T18:28:29Z
+  commits:
+    - hash: 0a08baa0ebac92661c82b20c75d02dd06d7794d8
+      author: Alexis Svinartchouk
+      footers:
+        change-type: patch
+      subject: Use @types/usb instead of our own typings
+      body:
+    - hash: 2bd3c6edc833339693472d8d0287d0e5ae3e7365
+      author: Alexis Svinartchouk
+      footers:
+        change-type: patch
+      subject: Update resin-lint to ^3.0.1
+      body:
+    - hash: c38d2b6689484d90994bd5b14d1bac387392ce1b
+      author: Alexis Svinartchouk
+      footers:
+        change-type: minor
+      subject: Export isUsbBootCapableUSBDevice
+      body:
+- version: 0.1.0
+  date: 2019-02-07T17:33:15Z
+  commits:
+    - hash: eb02c3f2982a9b17bc52446844606719ac513185
+      author: curcuz
+      footers:
+        change-type: minor
+        signed-off-by: Carlo Maria Curinga <carlo@balena.io>
+      subject: update usbboot firmware to support the CM3+
+      body:
+- version: 0.0.13
+  date: 2018-10-22T14:53:39Z
+  commits:
+    - hash: 3ea48ebf27b884436d01ee4339b307e9a83c7053
+      author: Alexis Svinartchouk
+      footers:
+        change-type: patch
+        signed-off-by: Alexis Svinartchouk <alexis@balena.io>
+      subject: Update resin-lint, run prettier on all ts files
+      body:
+- version: 0.0.12
+  date: 2018-10-19T13:15:27Z
+  commits:
+    - hash: 9babdaa78ce630bc1e61b7b62124b34cca30449e
+      author: Juan Cruz Viotti
+      footers:
+        change-type: patch
+        signed-off-by: Juan Cruz Viotti <juan@balena.io>
+      subject: Claim usb interface before running usbboot
+      body: Otherwise the bulk transfer fails on macOS.
+- version: 0.0.11
+  date: 2018-10-19T11:25:40Z
+  commits:
+    - hash: b9107bec86a99f9f49627b4091fcf7dc43bffb9b
+      author: Alexis Svinartchouk
+      footers:
+        change-type: patch
+        signed-off-by: Alexis Svinartchouk <alexis@resin.io>
+      subject: Remove mutex in epWrite
+      body: |-
+        But split the data being transferred in 1MiB chunks.
+        This way we shouldn't saturate the usb bus.
+- version: 0.0.10
+  date: 2018-10-18T19:41:46Z
+  commits:
+    - hash: 53c72338284e28a90da9cfb1b8f0ec5a644ddb83
+      author: Alexis Svinartchouk
+      footers:
+        change-type: patch
+        signed-off-by: Alexis Svinartchouk <alexis@resin.io>
+      subject: Add the usb port id to each debug message
+      body:
+    - hash: bfbce42a9875996fb7c6109d2fff17fcc78093dc
+      author: Alexis Svinartchouk
+      footers:
+        change-type: patch
+        signed-off-by: Alexis Svinartchouk <alexis@resin.io>
+      subject: Add a mutex around epWrite.
+      body: |-
+        This fixes LIBUSB_ERROR_IO errors when plugging more than one
+        usbboot device.
+- version: 0.0.9
+  date: 2018-10-10T13:06:51Z
+  commits:
+    - hash: 229715fc389d617834ddb00a7009ff4cb10e4770
+      author: Alexis Svinartchouk
+      footers:
+        change-type: patch
+        signed-off-by: Alexis Svinartchouk <alexis@resin.io>
+      subject: Build before publishing
+      body:
+- version: 0.0.8
+  date: 2018-10-10T10:17:30Z
+  commits:
+    - hash: 87875664fe8b4df61ddd716eec93ff69aa7ee5f4
+      author: Alexis Svinartchouk
+      footers:
+        change-type: patch
+        signed-off-by: Alexis Svinartchouk <alexis@resin.io>
+      subject: Use fork of node-usb to disable libudev
+      body: Same as https://github.com/resin-io/etcher/commit/7e01eca7f5e5fa60311d805baa9f6e833bddc014
+- version: 0.0.7
+  date: 2018-07-06T15:10:59Z
+  commits:
+    - hash: 49558bb02dd751f1a796d31ef340f3dbedd080b7
+      author: Alexis Svinartchouk
+      footers:
+        change-type: patch
+      subject: Update node-usb to 1.3.2
+      body: 1.3.2 includes our https://github.com/tessel/node-usb/commit/41fd0ec060b04b2dca454dd45221358f1fabcf83 fix
+- version: 0.0.6
+  date: 2018-07-03T10:53:33Z
+  commits:
+    - hash: 769298dcd1a872eeac9f5f610d2d24a881863820
+      author: Alexis Svinartchouk
+      footers:
+        change-type: patch
+      subject: When an error happens during a usb transfer, don't emit an error.
+      body: Remove the device instead.
+- version: 0.0.5
+  date: 2018-06-11T17:12:19Z
+  commits:
+    - hash: f31629fb35bb2a75acb52422a636eb547e0cace0
+      author: Alexis Svinartchouk
+      footers:
+        change-type: patch
+      subject: Target es6
+      body:
+- version: 0.0.4
+  date: 2018-05-15T13:14:42Z
+  commits:
+    - hash: 3bc10aac96ab4ba9812a47aa081053861d0e5c5f
+      author: Alexis Svinartchouk
+      footers:
+        change-type: patch
+      subject: Emit a 'ready' event.
+      body: 'Connects-To: #6'
+- version: 0.0.3
+  date: 2018-05-10T12:11:19Z
+  commits:
+    - hash: 0d0c46b6323e6d8510f71f02d08c7de411efccab
+      author: Alexis Svinartchouk
+      footers:
+        change-type: patch
+      subject: UsbbootScanner.step is private
+      body: 'Connects-To: #4'
+- version: 0.0.2
+  date: 2018-05-09T16:21:15Z
+  commits:
+    - hash: dc758be38518ac940b03ee71c30b4850dbd45672
+      author: Alexis Svinartchouk
+      footers:
+        change-type: patch
+      subject: Add types to package.json
+      body: 'Connects-To: #2'
