@@ -15,7 +15,7 @@ const main = () => {
 		usbbootDevice.removeAllListeners();
 		console.log('device', usbbootDevice.portId, 'detached');
 	});
-	console.log('Waiting for BCM2835/6/7');
+	console.log('Waiting for BCM2835/6/7/2711');
 	scanner.start();
 };
 

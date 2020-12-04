@@ -124,6 +124,7 @@ const USB_ENDPOINT_INTERFACES_SOC_BCM2835 = 1;
 const USB_VENDOR_ID_BROADCOM_CORPORATION = 0x0a5c;
 const USB_PRODUCT_ID_BCM2708_BOOT = 0x2763;
 const USB_PRODUCT_ID_BCM2710_BOOT = 0x2764;
+const USB_PRODUCT_ID_BCM2711_BOOT = 0x2711;
 
 // When the pi reboots in mass storage mode, it has this product id
 const USB_VENDOR_ID_NETCHIP_TECHNOLOGY = 0x0525;
@@ -214,7 +215,8 @@ export const isUsbBootCapableUSBDevice = (
 	return (
 		idVendor === USB_VENDOR_ID_BROADCOM_CORPORATION &&
 		(idProduct === USB_PRODUCT_ID_BCM2708_BOOT ||
-			idProduct === USB_PRODUCT_ID_BCM2710_BOOT)
+			idProduct === USB_PRODUCT_ID_BCM2710_BOOT || 
+				idProduct === USB_PRODUCT_ID_BCM2711_BOOT)
 	);
 };
 
@@ -449,7 +451,7 @@ export class UsbbootScanner extends EventEmitter {
 	}
 
 	public start(): void {
-		debug('Waiting for BCM2835/6/7');
+		debug('Waiting for BCM2835/6/7/2711');
 
 		// Prepare already connected devices
 		usb.getDeviceList().map(this.boundAttachDevice);
