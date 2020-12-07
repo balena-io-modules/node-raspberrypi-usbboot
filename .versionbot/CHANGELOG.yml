@@ -1,4 +1,18 @@
 - commits:
+    - subject: Update usbboot firmware to support CM4
+      hash: 04e9402415765dca04036d06e52b40d15bc85770
+      body: >
+        Update existing firmware files to latest versions and add firmware to
+        support CM4. Also add USB product id for Pi4 and CM4.
+      footer:
+        Change-type: minor
+        change-type: minor
+        Signed-off-by: Aaron Shaw <aaron@balena.io>
+        signed-off-by: Aaron Shaw <aaron@balena.io>
+      author: Aaron Shaw
+  version: 0.3.0
+  date: 2020-12-07T22:30:42.583Z
+- commits:
     - subject: Update typescript to v4.1.2
       hash: 58bd9ff059a46e8c5e1e53e9859fbabc9444de0c
       body: ''
