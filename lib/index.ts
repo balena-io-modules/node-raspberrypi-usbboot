@@ -215,7 +215,7 @@ export const isUsbBootCapableUSBDevice = (
 	return (
 		idVendor === USB_VENDOR_ID_BROADCOM_CORPORATION &&
 		(idProduct === USB_PRODUCT_ID_BCM2708_BOOT ||
-			idProduct === USB_PRODUCT_ID_BCM2710_BOOT || 
+			idProduct === USB_PRODUCT_ID_BCM2710_BOOT ||
 				idProduct === USB_PRODUCT_ID_BCM2711_BOOT)
 	);
 };
