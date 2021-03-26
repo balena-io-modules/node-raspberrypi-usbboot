@@ -362,7 +362,7 @@ const getFileBuffer = async (filename: string): Promise<Buffer | undefined> => {
  * } boot_message_t;
  *
  * This needs to be sent to the out endpoint of the USB device
- * as a 24 bytes big-endian buffer where:
+ * as a 24 bytes little-endian buffer where:
  *
  * - The first 4 bytes contain the size of the bootcode.bin buffer
  * - The remaining 20 bytes contain the boot signature, which
@@ -373,8 +373,8 @@ const createBootMessageBuffer = (bootCodeBufferLength: number): Buffer => {
 		BOOT_MESSAGE_BOOTCODE_LENGTH_SIZE + BOOT_MESSAGE_SIGNATURE_SIZE;
 	// Buffers are automatically filled with zero bytes
 	const bootMessageBuffer = Buffer.alloc(bootMessageBufferSize);
-	// The bootcode length should be stored in 4 big-endian bytes
-	bootMessageBuffer.writeInt32BE(
+	// The bootcode length should be stored in 4 little-endian bytes
+	bootMessageBuffer.writeInt32LE(
 		bootCodeBufferLength,
 		BOOT_MESSAGE_BOOTCODE_LENGTH_OFFSET,
 	);
