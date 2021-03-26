@@ -124,6 +124,8 @@ const USB_ENDPOINT_INTERFACES_SOC_BCM2835 = 1;
 const USB_VENDOR_ID_BROADCOM_CORPORATION = 0x0a5c;
 const USB_PRODUCT_ID_BCM2708_BOOT = 0x2763;
 const USB_PRODUCT_ID_BCM2710_BOOT = 0x2764;
+const USB_PRODUCT_ID_BCM2711_BOOT = 0x2711;
+const USB_PRODUCT_ID_BCM2711_MASS_STORAGE = 1;
 
 // When the pi reboots in mass storage mode, it has this product id
 const USB_VENDOR_ID_NETCHIP_TECHNOLOGY = 0x0525;
@@ -214,7 +216,8 @@ export const isUsbBootCapableUSBDevice = (
 	return (
 		idVendor === USB_VENDOR_ID_BROADCOM_CORPORATION &&
 		(idProduct === USB_PRODUCT_ID_BCM2708_BOOT ||
-			idProduct === USB_PRODUCT_ID_BCM2710_BOOT)
+			idProduct === USB_PRODUCT_ID_BCM2710_BOOT ||
+			idProduct === USB_PRODUCT_ID_BCM2711_BOOT)
 	);
 };
 
@@ -229,6 +232,13 @@ const isRaspberryPiInMassStorageMode = (device: usb.Device): boolean => {
 	return (
 		device.deviceDescriptor.idVendor === USB_VENDOR_ID_NETCHIP_TECHNOLOGY &&
 		device.deviceDescriptor.idProduct === USB_PRODUCT_ID_POCKETBOOK_PRO_903
+	);
+};
+
+const isComputeModule4InMassStorageMode = (device: usb.Device): boolean => {
+	return (
+		device.deviceDescriptor.idVendor === USB_VENDOR_ID_BROADCOM_CORPORATION &&
+		device.deviceDescriptor.idProduct === USB_PRODUCT_ID_BCM2711_MASS_STORAGE
 	);
 };
 
@@ -339,11 +349,15 @@ const safeReadFile = async (filename: string): Promise<Buffer | undefined> => {
 	}
 };
 
-const getFileBuffer = async (filename: string): Promise<Buffer | undefined> => {
-	let buffer = await safeReadFile(filename);
-	if (buffer === undefined) {
-		buffer = await safeReadFile(Path.join('raspberrypi', filename));
-	}
+const getFileBuffer = async (
+	device: usb.Device,
+	filename: string,
+): Promise<Buffer | undefined> => {
+	const folder =
+		device.deviceDescriptor.idProduct === USB_PRODUCT_ID_BCM2711_BOOT
+			? 'cm4'
+			: 'raspberrypi';
+	const buffer = await safeReadFile(Path.join(folder, filename));
 	if (buffer === undefined) {
 		debug("Can't read file", filename);
 	}
@@ -362,7 +376,7 @@ const getFileBuffer = async (filename: string): Promise<Buffer | undefined> => {
  * } boot_message_t;
  *
  * This needs to be sent to the out endpoint of the USB device
- * as a 24 bytes big-endian buffer where:
+ * as a 24 bytes little-endian buffer where:
  *
  * - The first 4 bytes contain the size of the bootcode.bin buffer
  * - The remaining 20 bytes contain the boot signature, which
@@ -373,8 +387,8 @@ const createBootMessageBuffer = (bootCodeBufferLength: number): Buffer => {
 		BOOT_MESSAGE_BOOTCODE_LENGTH_SIZE + BOOT_MESSAGE_SIGNATURE_SIZE;
 	// Buffers are automatically filled with zero bytes
 	const bootMessageBuffer = Buffer.alloc(bootMessageBufferSize);
-	// The bootcode length should be stored in 4 big-endian bytes
-	bootMessageBuffer.writeInt32BE(
+	// The bootcode length should be stored in 4 little-endian bytes
+	bootMessageBuffer.writeInt32LE(
 		bootCodeBufferLength,
 		BOOT_MESSAGE_BOOTCODE_LENGTH_OFFSET,
 	);
@@ -385,7 +399,7 @@ const secondStageBoot = async (
 	device: usb.Device,
 	endpoint: usb.OutEndpoint,
 ) => {
-	const bootcodeBuffer = await getFileBuffer('bootcode.bin');
+	const bootcodeBuffer = await getFileBuffer(device, 'bootcode.bin');
 	if (bootcodeBuffer === undefined) {
 		throw new Error("Can't find bootcode.bin");
 	}
@@ -403,15 +417,8 @@ const secondStageBoot = async (
 	}
 };
 
-export class UsbbootDevice extends EventEmitter {
-	// LAST_STEP is hardcoded here as it is depends on the bootcode.bin file we send to the pi.
-	// List of steps:
-	// 0) device connects with iSerialNumber 0 and we write bootcode.bin to it
-	// 1) the device detaches
-	// 2 - 39) the device reattaches with iSerialNumber 1 and we upload the files it requires (the number of steps depends on the device)
-	// 40) the device detaches
-	// 41) the device reattaches as a mass storage device
-	public static readonly LAST_STEP = 41;
+export abstract class UsbbootDevice extends EventEmitter {
+	public abstract readonly LAST_STEP: number;
 	private _step = 0;
 
 	constructor(public portId: string) {
@@ -419,7 +426,7 @@ export class UsbbootDevice extends EventEmitter {
 	}
 
 	get progress() {
-		return Math.round((this._step / UsbbootDevice.LAST_STEP) * 100);
+		return Math.round((this._step / this.LAST_STEP) * 100);
 	}
 
 	get step() {
@@ -430,6 +437,28 @@ export class UsbbootDevice extends EventEmitter {
 		this._step = step;
 		this.emit('progress', this.progress);
 	}
+}
+
+export class CM3 extends UsbbootDevice {
+	// LAST_STEP is hardcoded here as it is depends on the bootcode.bin file we send to the pi.
+	// List of steps:
+	// 0) device connects with iSerialNumber 0 and we write bootcode.bin to it
+	// 1) the device detaches
+	// 2 - 38) the device reattaches with iSerialNumber 1 and we upload the files it requires (the number of steps depends on the device)
+	// 39) the device detaches
+	// 40) the device reattaches as a mass storage device
+	public readonly LAST_STEP = 40;
+}
+
+export class CM4 extends UsbbootDevice {
+	// LAST_STEP is hardcoded here as it is depends on the bootcode.bin file we send to the pi.
+	// List of steps:
+	// 0) device connects with iSerialNumber 0 and we write bootcode.bin to it
+	// 1) the device detaches
+	// 2 - 8) the device reattaches with iSerialNumber 1 and we upload the files it requires (the number of steps depends on the device)
+	// 9) the device detaches
+	// 10) the device reattaches as a mass storage device
+	public readonly LAST_STEP = 10;
 }
 
 export class UsbbootScanner extends EventEmitter {
@@ -449,7 +478,7 @@ export class UsbbootScanner extends EventEmitter {
 	}
 
 	public start(): void {
-		debug('Waiting for BCM2835/6/7');
+		debug('Waiting for BCM2835/6/7/2711');
 
 		// Prepare already connected devices
 		usb.getDeviceList().map(this.boundAttachDevice);
@@ -465,7 +494,7 @@ export class UsbbootScanner extends EventEmitter {
 		// ts-ignore because of a confusion between NodeJS.Timer and number
 		// @ts-ignore
 		this.interval = setInterval(() => {
-			usb.getDeviceList().forEach(this.boundAttachDevice);
+			// usb.getDeviceList().forEach(this.boundAttachDevice);
 		}, POLLING_INTERVAL_MS);
 	}
 
@@ -479,7 +508,7 @@ export class UsbbootScanner extends EventEmitter {
 	private step(device: usb.Device, step: number): void {
 		const usbbootDevice = this.getOrCreate(device);
 		usbbootDevice.step = step;
-		if (step === UsbbootDevice.LAST_STEP) {
+		if (step === usbbootDevice.LAST_STEP) {
 			this.remove(device);
 		}
 	}
@@ -493,7 +522,11 @@ export class UsbbootScanner extends EventEmitter {
 		const key = devicePortId(device);
 		let usbbootDevice = this.usbbootDevices.get(key);
 		if (usbbootDevice === undefined) {
-			usbbootDevice = new UsbbootDevice(key);
+			const Cls =
+				device.deviceDescriptor.idProduct === USB_PRODUCT_ID_BCM2711_BOOT
+					? CM4
+					: CM3;
+			usbbootDevice = new Cls(key);
 			this.usbbootDevices.set(key, usbbootDevice);
 			this.emit('attach', usbbootDevice);
 		}
@@ -515,11 +548,13 @@ export class UsbbootScanner extends EventEmitter {
 		}
 		this.attachedDeviceIds.add(getDeviceId(device));
 
+		const usbbootDevice = this.get(device);
 		if (
-			isRaspberryPiInMassStorageMode(device) &&
-			this.usbbootDevices.has(devicePortId(device))
+			(isRaspberryPiInMassStorageMode(device) ||
+				isComputeModule4InMassStorageMode(device)) &&
+			usbbootDevice !== undefined
 		) {
-			this.step(device, 41);
+			this.step(device, usbbootDevice.LAST_STEP);
 			return;
 		}
 		if (!isUsbBootCapableUSBDevice$(device)) {
@@ -529,7 +564,11 @@ export class UsbbootScanner extends EventEmitter {
 		debug('port id', devicePortId(device));
 		try {
 			const { endpoint } = initializeDevice(device);
-			if (device.deviceDescriptor.iSerialNumber === 0) {
+			// cm: 0; cm4: 3
+			if (
+				device.deviceDescriptor.iSerialNumber === 0 ||
+				device.deviceDescriptor.iSerialNumber === 3
+			) {
 				debug('Sending bootcode.bin', devicePortId(device));
 				this.step(device, 0);
 				await secondStageBoot(device, endpoint);
@@ -551,14 +590,18 @@ export class UsbbootScanner extends EventEmitter {
 		if (!isUsbBootCapableUSBDevice$(device)) {
 			return;
 		}
-		const step = device.deviceDescriptor.iSerialNumber === 0 ? 1 : 40;
+		const usbbootDevice = this.getOrCreate(device);
+		const step =
+			device.deviceDescriptor.iSerialNumber === 0
+				? 1
+				: usbbootDevice.LAST_STEP - 1;
 		debug('detach', devicePortId(device), step);
 		this.step(device, step);
 		// This timeout is here to differentiate between the device resetting and the device being unplugged
 		// If the step didn't changed in 5 seconds, we assume the device was unplugged.
 		setTimeout(() => {
-			const usbbootDevice = this.get(device);
-			if (usbbootDevice !== undefined && usbbootDevice.step === step) {
+			const $usbbootDevice = this.get(device);
+			if ($usbbootDevice !== undefined && $usbbootDevice.step === step) {
 				debug(
 					'device',
 					devicePortId(device),
@@ -577,8 +620,6 @@ export class UsbbootScanner extends EventEmitter {
 		step: number,
 	) {
 		while (true) {
-			this.step(device, step);
-			step += 1;
 			let data;
 			try {
 				data = await epRead(device, FILE_MESSAGE_SIZE);
@@ -593,6 +634,8 @@ export class UsbbootScanner extends EventEmitter {
 				await delay(READ_ERROR_DELAY);
 				continue;
 			}
+			this.step(device, step);
+			step += 1;
 			const message = parseFileMessageBuffer(data);
 			debug(
 				'Received message',
@@ -604,7 +647,7 @@ export class UsbbootScanner extends EventEmitter {
 				message.command === FileMessageCommand.GetFileSize ||
 				message.command === FileMessageCommand.ReadFile
 			) {
-				const buffer = await getFileBuffer(message.filename);
+				const buffer = await getFileBuffer(device, message.filename);
 				if (buffer === undefined) {
 					debug(`Couldn't find ${message.filename}`, devicePortId(device));
 					await sendSize(device, 0);
