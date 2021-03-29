@@ -592,9 +592,9 @@ export class UsbbootScanner extends EventEmitter {
 		}
 		const usbbootDevice = this.getOrCreate(device);
 		const step =
-			device.deviceDescriptor.iSerialNumber === 0
-				? 1
-				: usbbootDevice.LAST_STEP - 1;
+			device.deviceDescriptor.iSerialNumber === 1
+				? usbbootDevice.LAST_STEP - 1
+				: 1;
 		debug('detach', devicePortId(device), step);
 		this.step(device, step);
 		// This timeout is here to differentiate between the device resetting and the device being unplugged
