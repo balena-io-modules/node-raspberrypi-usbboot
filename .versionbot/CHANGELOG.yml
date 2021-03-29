@@ -1,4 +1,14 @@
 - commits:
+    - subject: Fix progress calculation for cm4
+      hash: f08d7ae3b8803814e56af9e85c828f8a35a597bd
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Alexis Svinartchouk
+  version: 0.3.1
+  date: 2021-03-29T11:36:30.754Z
+- commits:
     - subject: Add support for compute module 4
       hash: 701744f0bbc02bd7d322ed7e989af576a7156689
       body: ''
