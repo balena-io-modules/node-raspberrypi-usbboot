@@ -1,4 +1,14 @@
 - commits:
+    - subject: 'major: Switch to tessel/node-usb'
+      hash: 637cc97c6c4ffe4d2e55a1ab56ecd3cc8ee870eb
+      body: ''
+      footer:
+        Signed-off-by: Lorenzo Alberto Maria Ambrosi <lorenzothunder.ambrosi@gmail.com>
+        signed-off-by: Lorenzo Alberto Maria Ambrosi <lorenzothunder.ambrosi@gmail.com>
+      author: Lorenzo Alberto Maria Ambrosi
+  version: 1.0.0
+  date: 2021-09-30T14:34:53.664Z
+- commits:
     - subject: Fix progress calculation for cm4
       hash: f08d7ae3b8803814e56af9e85c828f8a35a597bd
       body: ''
