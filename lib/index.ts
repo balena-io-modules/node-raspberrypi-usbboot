@@ -5,7 +5,7 @@
 
 // tslint:disable:no-bitwise
 
-import * as usb from '@balena.io/usb';
+import * as usb from 'usb';
 import * as _debug from 'debug';
 import { EventEmitter } from 'events';
 import { readFile as readFile_ } from 'fs';
