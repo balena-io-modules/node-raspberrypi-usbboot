@@ -7,9 +7,11 @@ npm:
       node_versions:
         - "10"
         - "12"
+        - "14"
     - name: linux
       os: ubuntu
       architecture: x86
       node_versions:
         - "10"
         - "12"
+        - "14"
