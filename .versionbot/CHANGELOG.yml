@@ -1,4 +1,14 @@
 - commits:
+    - subject: 'patch: Add node14 tests'
+      hash: eaf4e6eb177756e87600f0501754a44daf51e959
+      body: ''
+      footer:
+        Signed-off-by: Lorenzo Alberto Maria Ambrosi <lorenzothunder.ambrosi@gmail.com>
+        signed-off-by: Lorenzo Alberto Maria Ambrosi <lorenzothunder.ambrosi@gmail.com>
+      author: Lorenzo Alberto Maria Ambrosi
+  version: 1.0.1
+  date: 2021-09-30T17:06:19.662Z
+- commits:
     - subject: 'major: Switch to tessel/node-usb'
       hash: 637cc97c6c4ffe4d2e55a1ab56ecd3cc8ee870eb
       body: ''
