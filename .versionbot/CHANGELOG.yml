@@ -1,4 +1,24 @@
 - commits:
+    - subject: 'blobs/raspberrypi: Revert start_cd.elf to f4e3f0f revision'
+      hash: 1a4d68b2e381bfe0ef0fa71614943e559ad3265b
+      body: |
+        The current HEAD revision of start.elf breaks msd
+        mode for custom raspberrypi devices. All files are
+        transfered to the device but it does not enter mass
+        storage mode.
+
+        We have an open issue in upstream rpi usbboot,
+        so this patch should not be merged, we'll only
+        use it to unblock testing.
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Alexandru Costache <alexandru@balena.io>
+        signed-off-by: Alexandru Costache <alexandru@balena.io>
+      author: Alexandru Costache
+  version: 1.0.2
+  date: 2021-11-24T08:17:56.449Z
+- commits:
     - subject: 'patch: Add node14 tests'
       hash: eaf4e6eb177756e87600f0501754a44daf51e959
       body: ''
