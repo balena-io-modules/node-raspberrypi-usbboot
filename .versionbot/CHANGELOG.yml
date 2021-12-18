@@ -1,4 +1,23 @@
 - commits:
+    - subject: 'blobs/raspberrypi: Update start_cd.elf to latest patched revision'
+      hash: 563cd1946d4862676eac9b16c8a2cf890153de8c
+      body: |
+        This is the latest revision of start.elf, from
+        upstream raspberrypi usbboot revision 14ea684, which
+        again allows for custom RaspberryPis to be put in MSD mode.
+
+        This binary is patched, which means the original magic sequence
+        0xbe 0xba 0xe0 0xac has been replaced with 0x86 0x00 0x00 0x00
+        to specify the EMMC_ENABLE pin for the custom Pis.
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Alexandru Costache <alexandru@balena.io>
+        signed-off-by: Alexandru Costache <alexandru@balena.io>
+      author: Alexandru Costache
+  version: 1.0.2
+  date: 2021-12-06T15:41:05.504Z
+- commits:
     - subject: 'patch: Add node14 tests'
       hash: eaf4e6eb177756e87600f0501754a44daf51e959
       body: ''
