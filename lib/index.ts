@@ -5,7 +5,9 @@
 
 // tslint:disable:no-bitwise
 
-import * as usb from 'usb';
+import { usb } from 'usb';
+import { OutEndpoint } from 'usb/dist/usb/endpoint';
+import { Interface } from 'usb/dist/usb/interface';
 import * as _debug from 'debug';
 import { EventEmitter } from 'events';
 import { readFile as readFile_ } from 'fs';
@@ -244,7 +246,7 @@ const isComputeModule4InMassStorageMode = (device: usb.Device): boolean => {
 
 const initializeDevice = (
 	device: usb.Device,
-): { iface: usb.Interface; endpoint: usb.OutEndpoint } => {
+): { iface: Interface; endpoint: OutEndpoint } => {
 	// interface is a reserved keyword in TypeScript so we use iface
 	device.open();
 	// Handle 2837 where it can start with two interfaces, the first is mass storage
@@ -252,7 +254,7 @@ const initializeDevice = (
 	let interfaceNumber;
 	let endpointNumber;
 	if (
-		device.configDescriptor.bNumInterfaces ===
+		device.configDescriptor?.bNumInterfaces ===
 		USB_ENDPOINT_INTERFACES_SOC_BCM2835
 	) {
 		interfaceNumber = 0;
@@ -264,7 +266,7 @@ const initializeDevice = (
 	const iface = device.interface(interfaceNumber);
 	iface.claim();
 	const endpoint = iface.endpoint(endpointNumber);
-	if (!(endpoint instanceof usb.OutEndpoint)) {
+	if (!(endpoint instanceof OutEndpoint)) {
 		throw new Error('endpoint is not an usb.OutEndpoint');
 	}
 	debug('Initialized device correctly', devicePortId(device));
@@ -288,7 +290,7 @@ function* chunks(buffer: Buffer, size: number) {
 	}
 }
 
-const transfer = async (endpoint: usb.OutEndpoint, chunk: Buffer) => {
+const transfer = async (endpoint: OutEndpoint, chunk: Buffer) => {
 	endpoint.timeout = USB_BULK_TRANSFER_TIMEOUT_MS;
 	for (let tries = 0; tries < 3; tries++) {
 		if (tries > 0) {
@@ -311,7 +313,7 @@ const transfer = async (endpoint: usb.OutEndpoint, chunk: Buffer) => {
 const epWrite = async (
 	buffer: Buffer,
 	device: usb.Device,
-	endpoint: usb.OutEndpoint,
+	endpoint: OutEndpoint,
 ) => {
 	debug('Sending buffer size', buffer.length);
 	await sendSize(device, buffer.length);
@@ -395,10 +397,7 @@ const createBootMessageBuffer = (bootCodeBufferLength: number): Buffer => {
 	return bootMessageBuffer;
 };
 
-const secondStageBoot = async (
-	device: usb.Device,
-	endpoint: usb.OutEndpoint,
-) => {
+const secondStageBoot = async (device: usb.Device, endpoint: OutEndpoint) => {
 	const bootcodeBuffer = await getFileBuffer(device, 'bootcode.bin');
 	if (bootcodeBuffer === undefined) {
 		throw new Error("Can't find bootcode.bin");
@@ -616,7 +615,7 @@ export class UsbbootScanner extends EventEmitter {
 
 	private async fileServer(
 		device: usb.Device,
-		endpoint: usb.OutEndpoint,
+		endpoint: OutEndpoint,
 		step: number,
 	) {
 		while (true) {
