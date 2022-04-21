@@ -1,5 +1,23 @@
 - commits:
-    - subject: 'blobs/raspberrypi: Update start_cd.elf to latest patched revision'
+    - subject: update usb
+      hash: 6480c9bcce0458099770bb336b12e62c04a398ef
+      body: >
+        This is an attempt to fix the compute module not showing up on monterrey
+
+
+        As it turns out, that was not the problem, and the problem was that the fin was connected through a hub.
+
+
+        This is still a useful change though.
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Zane Hitchcox
+  version: 1.0.3
+  title: "'update usb'"
+  date: 2022-04-20T12:52:42.143Z
+- commits:
+    - subject: "blobs/raspberrypi: Update start_cd.elf to latest patched revision"
       hash: 563cd1946d4862676eac9b16c8a2cf890153de8c
       body: |
         This is the latest revision of start.elf, from
@@ -18,9 +36,9 @@
   version: 1.0.2
   date: 2021-12-06T15:41:05.504Z
 - commits:
-    - subject: 'patch: Add node14 tests'
+    - subject: "patch: Add node14 tests"
       hash: eaf4e6eb177756e87600f0501754a44daf51e959
-      body: ''
+      body: ""
       footer:
         Signed-off-by: Lorenzo Alberto Maria Ambrosi <lorenzothunder.ambrosi@gmail.com>
         signed-off-by: Lorenzo Alberto Maria Ambrosi <lorenzothunder.ambrosi@gmail.com>
@@ -28,9 +46,9 @@
   version: 1.0.1
   date: 2021-09-30T17:06:19.662Z
 - commits:
-    - subject: 'major: Switch to tessel/node-usb'
+    - subject: "major: Switch to tessel/node-usb"
       hash: 637cc97c6c4ffe4d2e55a1ab56ecd3cc8ee870eb
-      body: ''
+      body: ""
       footer:
         Signed-off-by: Lorenzo Alberto Maria Ambrosi <lorenzothunder.ambrosi@gmail.com>
         signed-off-by: Lorenzo Alberto Maria Ambrosi <lorenzothunder.ambrosi@gmail.com>
@@ -40,7 +58,7 @@
 - commits:
     - subject: Fix progress calculation for cm4
       hash: f08d7ae3b8803814e56af9e85c828f8a35a597bd
-      body: ''
+      body: ""
       footer:
         Change-type: patch
         change-type: patch
@@ -50,14 +68,14 @@
 - commits:
     - subject: Add support for compute module 4
       hash: 701744f0bbc02bd7d322ed7e989af576a7156689
-      body: ''
+      body: ""
       footer:
         Change-type: minor
         change-type: minor
       author: Alexis Svinartchouk
     - subject: Fix size endianness of boot_message_t message
       hash: 867d8b0d217af0ad554d839fbc42cc08b222bc32
-      body: ''
+      body: ""
       footer:
         Change-type: patch
         change-type: patch
@@ -78,14 +96,14 @@
 - commits:
     - subject: Update typescript to v4.1.2
       hash: 58bd9ff059a46e8c5e1e53e9859fbabc9444de0c
-      body: ''
+      body: ""
       footer:
         Change-type: patch
         change-type: patch
       author: Alexis Svinartchouk
     - subject: Add versionbot changelog
       hash: e2f9463549ddc0ed910569a18ce356a6f304220b
-      body: ''
+      body: ""
       footer:
         Change-type: patch
         change-type: patch
@@ -120,7 +138,7 @@
       author: Alexis Svinartchouk
       footers:
         change-type: patch
-      subject: 'Update dependencies, target es2018'
+      subject: Update dependencies, target es2018
       body: null
     - hash: 1ddae09dee43c38dd28b5d6cf4afd8f1f7e0ac38
       author: Alexis Svinartchouk
@@ -163,7 +181,7 @@
       footers:
         change-type: patch
         signed-off-by: Gergely Imreh <imrehg@gmail.com>
-      subject: 'dependencies: bump node-usb to v1.3.10 to enable Node 12 builds'
+      subject: "dependencies: bump node-usb to v1.3.10 to enable Node 12 builds"
       body: null
 - version: 0.2.3
   date: 2019-03-20T14:00:26.000Z
@@ -183,7 +201,7 @@
       footers:
         change-type: patch
         signed-off-by: Juan Cruz Viotti <juan@balena.io>
-      subject: 'node-usb: Upgrade to v1.3.6'
+      subject: "node-usb: Upgrade to v1.3.6"
       body: null
 - version: 0.2.1
   date: 2019-03-20T10:56:36.000Z
@@ -250,7 +268,7 @@
       footers:
         change-type: patch
         signed-off-by: Alexis Svinartchouk <alexis@balena.io>
-      subject: 'Update resin-lint, run prettier on all ts files'
+      subject: Update resin-lint, run prettier on all ts files
       body: null
 - version: 0.0.12
   date: 2018-10-19T13:15:27.000Z
@@ -312,8 +330,7 @@
         change-type: patch
         signed-off-by: Alexis Svinartchouk <alexis@resin.io>
       subject: Use fork of node-usb to disable libudev
-      body: >-
-        Same as
+      body: Same as
         https://github.com/resin-io/etcher/commit/7e01eca7f5e5fa60311d805baa9f6e833bddc014
 - version: 0.0.7
   date: 2018-07-06T15:10:59.000Z
@@ -323,8 +340,7 @@
       footers:
         change-type: patch
       subject: Update node-usb to 1.3.2
-      body: >-
-        1.3.2 includes our
+      body: 1.3.2 includes our
         https://github.com/tessel/node-usb/commit/41fd0ec060b04b2dca454dd45221358f1fabcf83
         fix
 - version: 0.0.6
@@ -334,7 +350,7 @@
       author: Alexis Svinartchouk
       footers:
         change-type: patch
-      subject: 'When an error happens during a usb transfer, don''t emit an error.'
+      subject: When an error happens during a usb transfer, don't emit an error.
       body: Remove the device instead.
 - version: 0.0.5
   date: 2018-06-11T17:12:19.000Z
@@ -353,7 +369,7 @@
       footers:
         change-type: patch
       subject: Emit a 'ready' event.
-      body: 'Connects-To: #6'
+      body: "Connects-To: #6"
 - version: 0.0.3
   date: 2018-05-10T12:11:19.000Z
   commits:
@@ -362,7 +378,7 @@
       footers:
         change-type: patch
       subject: UsbbootScanner.step is private
-      body: 'Connects-To: #4'
+      body: "Connects-To: #4"
 - version: 0.0.2
   date: 2018-05-09T16:21:15.000Z
   commits:
@@ -371,4 +387,4 @@
       footers:
         change-type: patch
       subject: Add types to package.json
-      body: 'Connects-To: #2'
+      body: "Connects-To: #2"
