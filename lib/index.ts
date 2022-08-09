@@ -396,7 +396,8 @@ const createBootMessageBuffer = (bootCodeBufferLength: number): Buffer => {
 	);
 	return bootMessageBuffer;
 };
-
+const sleep = (seconds: number) =>
+	new Promise((resolve) => setTimeout(resolve, seconds * 1000));
 const secondStageBoot = async (device: usb.Device, endpoint: OutEndpoint) => {
 	const bootcodeBuffer = await getFileBuffer(device, 'bootcode.bin');
 	if (bootcodeBuffer === undefined) {
@@ -406,7 +407,7 @@ const secondStageBoot = async (device: usb.Device, endpoint: OutEndpoint) => {
 	await epWrite(bootMessage, device, endpoint);
 	debug(`Writing ${bootMessage.length} bytes`, devicePortId(device));
 	await epWrite(bootcodeBuffer, device, endpoint);
-	// raspberrypi's sample code has a sleep(1) here, but it looks like it isn't required.
+	await sleep(1);
 	const data = await epRead(device, RETURN_CODE_LENGTH);
 	const returnCode = data.readInt32LE(0);
 	if (returnCode !== RETURN_CODE_SUCCESS) {
