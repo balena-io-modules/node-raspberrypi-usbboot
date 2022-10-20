@@ -8,7 +8,8 @@
     "prettier": "balena-lint --fix --typescript lib/*.ts",
     "lint": "balena-lint --typescript lib/*.ts",
     "build": "npm run lint && rimraf build && tsc",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "test": "echo 'this is not a test'"
   },
   "files": [
     "build/index.js",
