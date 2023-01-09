@@ -134,7 +134,7 @@ const USB_VENDOR_ID_NETCHIP_TECHNOLOGY = 0x0525;
 const USB_PRODUCT_ID_POCKETBOOK_PRO_903 = 0xa4a5;
 
 // Delay in ms after which we consider that the device was unplugged (not resetted)
-const DEVICE_UNPLUG_TIMEOUT = 5000;
+const DEVICE_UNPLUG_TIMEOUT = 50000;
 
 // Delay (in ms) to wait when epRead throws an error
 const READ_ERROR_DELAY = 100;
@@ -419,6 +419,7 @@ const secondStageBoot = async (device: usb.Device, endpoint: OutEndpoint) => {
 export abstract class UsbbootDevice extends EventEmitter {
 	public abstract readonly LAST_STEP: number;
 	private _step = 0;
+	public last_serial = -1;
 
 	constructor(public portId: string) {
 		super();
@@ -507,6 +508,7 @@ export class UsbbootScanner extends EventEmitter {
 	private step(device: usb.Device, step: number): void {
 		const usbbootDevice = this.getOrCreate(device);
 		usbbootDevice.step = step;
+		usbbootDevice.last_serial = device.deviceDescriptor.iSerialNumber;
 		if (step === usbbootDevice.LAST_STEP) {
 			this.remove(device);
 		}
@@ -548,6 +550,13 @@ export class UsbbootScanner extends EventEmitter {
 		this.attachedDeviceIds.add(getDeviceId(device));
 
 		const usbbootDevice = this.get(device);
+		let forceSecondstage = false;
+		if (device.deviceDescriptor.iSerialNumber == usbbootDevice?.last_serial) {
+			if (device.deviceDescriptor.idProduct == 10001) {
+				forceSecondstage = true;
+			}
+		}
+
 		if (
 			(isRaspberryPiInMassStorageMode(device) ||
 				isComputeModule4InMassStorageMode(device)) &&
@@ -559,14 +568,14 @@ export class UsbbootScanner extends EventEmitter {
 		if (!isUsbBootCapableUSBDevice$(device)) {
 			return;
 		}
-		debug('Found serial number', device.deviceDescriptor.iSerialNumber);
+		debug('Found serial number', device.deviceDescriptor.iSerialNumber, `forceSecondStage: ${forceSecondstage}`);
 		debug('port id', devicePortId(device));
 		try {
 			const { endpoint } = initializeDevice(device);
 			// cm: 0; cm4: 3
 			if (
-				device.deviceDescriptor.iSerialNumber === 0 ||
-				device.deviceDescriptor.iSerialNumber === 3
+				(device.deviceDescriptor.iSerialNumber === 0 ||
+				device.deviceDescriptor.iSerialNumber === 3) && !forceSecondstage
 			) {
 				debug('Sending bootcode.bin', devicePortId(device));
 				this.step(device, 0);
