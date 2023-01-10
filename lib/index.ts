@@ -134,7 +134,7 @@ const USB_VENDOR_ID_NETCHIP_TECHNOLOGY = 0x0525;
 const USB_PRODUCT_ID_POCKETBOOK_PRO_903 = 0xa4a5;
 
 // Delay in ms after which we consider that the device was unplugged (not resetted)
-const DEVICE_UNPLUG_TIMEOUT = 50000;
+const DEVICE_UNPLUG_TIMEOUT = 5000;
 
 // Delay (in ms) to wait when epRead throws an error
 const READ_ERROR_DELAY = 100;
@@ -552,7 +552,7 @@ export class UsbbootScanner extends EventEmitter {
 		const usbbootDevice = this.get(device);
 		let forceSecondstage = false;
 		if (device.deviceDescriptor.iSerialNumber == usbbootDevice?.last_serial) {
-			if (device.deviceDescriptor.idProduct == 10001) {
+			if (usbbootDevice.step > 0) {
 				forceSecondstage = true;
 			}
 		}
@@ -568,7 +568,7 @@ export class UsbbootScanner extends EventEmitter {
 		if (!isUsbBootCapableUSBDevice$(device)) {
 			return;
 		}
-		debug('Found serial number', device.deviceDescriptor.iSerialNumber, `forceSecondStage: ${forceSecondstage}`);
+		debug('Found serial number', device.deviceDescriptor.iSerialNumber, `${forceSecondstage ? " => Forced second stage" : ""}`);
 		debug('port id', devicePortId(device));
 		try {
 			const { endpoint } = initializeDevice(device);
