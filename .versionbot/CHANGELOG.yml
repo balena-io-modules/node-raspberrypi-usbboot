@@ -1,4 +1,18 @@
 - commits:
+    - subject: "patch: removed device filtering from iSerial check"
+      hash: 9fef1aa279b71ca9d7e6945a51b65e7e049757ac
+      body: ""
+      footer: {}
+      author: Peter Makra
+    - subject: "patch: WIP force second stage"
+      hash: ce7b5fedeecfa6646d575d90e79f998a73eaf929
+      body: ""
+      footer: {}
+      author: Peter Makra
+  version: 1.0.5
+  title: ""
+  date: 2023-01-11T11:58:36.533Z
+- commits:
     - subject: switch from concourse to flowzone
       hash: 34ddd3ca4e36393dd499b6c8c1d07bd717b1a69f
       body: ""

@@ -1,6 +1,6 @@
 {
   "name": "node-raspberrypi-usbboot",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Transforms Raspberry Pi Compute Modules and Zeros to mass storage devices.",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -39,6 +39,6 @@
     "typescript": "^4.8.4"
   },
   "versionist": {
-    "publishedAt": "2022-10-21T06:39:22.999Z"
+    "publishedAt": "2023-01-11T11:58:36.664Z"
   }
 }
