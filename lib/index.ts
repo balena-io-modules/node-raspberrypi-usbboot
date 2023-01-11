@@ -419,6 +419,7 @@ const secondStageBoot = async (device: usb.Device, endpoint: OutEndpoint) => {
 export abstract class UsbbootDevice extends EventEmitter {
 	public abstract readonly LAST_STEP: number;
 	private _step = 0;
+	public last_serial = -1;
 
 	constructor(public portId: string) {
 		super();
@@ -507,6 +508,7 @@ export class UsbbootScanner extends EventEmitter {
 	private step(device: usb.Device, step: number): void {
 		const usbbootDevice = this.getOrCreate(device);
 		usbbootDevice.step = step;
+		usbbootDevice.last_serial = device.deviceDescriptor.iSerialNumber;
 		if (step === usbbootDevice.LAST_STEP) {
 			this.remove(device);
 		}
@@ -548,6 +550,13 @@ export class UsbbootScanner extends EventEmitter {
 		this.attachedDeviceIds.add(getDeviceId(device));
 
 		const usbbootDevice = this.get(device);
+		let forceSecondstage = false;
+		if (device.deviceDescriptor.iSerialNumber == usbbootDevice?.last_serial) {
+			if (usbbootDevice.step > 0) {
+				forceSecondstage = true;
+			}
+		}
+
 		if (
 			(isRaspberryPiInMassStorageMode(device) ||
 				isComputeModule4InMassStorageMode(device)) &&
@@ -559,14 +568,14 @@ export class UsbbootScanner extends EventEmitter {
 		if (!isUsbBootCapableUSBDevice$(device)) {
 			return;
 		}
-		debug('Found serial number', device.deviceDescriptor.iSerialNumber);
+		debug('Found serial number', device.deviceDescriptor.iSerialNumber, `${forceSecondstage ? " => Forced second stage" : ""}`);
 		debug('port id', devicePortId(device));
 		try {
 			const { endpoint } = initializeDevice(device);
 			// cm: 0; cm4: 3
 			if (
-				device.deviceDescriptor.iSerialNumber === 0 ||
-				device.deviceDescriptor.iSerialNumber === 3
+				(device.deviceDescriptor.iSerialNumber === 0 ||
+				device.deviceDescriptor.iSerialNumber === 3) && !forceSecondstage
 			) {
 				debug('Sending bootcode.bin', devicePortId(device));
 				this.step(device, 0);
