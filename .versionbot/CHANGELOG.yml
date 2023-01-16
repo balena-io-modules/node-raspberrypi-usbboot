@@ -1,4 +1,13 @@
 - commits:
+    - subject: "patch: updated start4.elf pieeprom-2021-07-06"
+      hash: ebe20fa8c50f58f8f91a2802c23403c85a7843a5
+      body: ""
+      footer: {}
+      author: Peter Makra
+  version: 1.0.6
+  title: ""
+  date: 2023-01-16T20:03:39.732Z
+- commits:
     - subject: "patch: removed device filtering from iSerial check"
       hash: 9fef1aa279b71ca9d7e6945a51b65e7e049757ac
       body: ""
