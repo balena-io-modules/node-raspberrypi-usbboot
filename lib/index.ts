@@ -10,9 +10,8 @@ import { OutEndpoint } from 'usb/dist/usb/endpoint';
 import { Interface } from 'usb/dist/usb/interface';
 import * as _debug from 'debug';
 import { EventEmitter } from 'events';
-import { readFile as readFile_ } from 'fs';
+import { readFile } from 'fs/promises';
 import * as Path from 'path';
-import { promisify } from 'util';
 
 async function delay(ms: number) {
 	await new Promise((resolve) => {
@@ -33,8 +32,6 @@ function fromCallback<T>(
 		});
 	});
 }
-
-const readFile = promisify(readFile_);
 
 const debug = _debug('node-raspberrypi-usbboot');
 

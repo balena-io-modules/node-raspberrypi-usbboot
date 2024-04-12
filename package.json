@@ -27,16 +27,16 @@
   "license": "Apache-2.0",
   "dependencies": {
     "debug": "^4.3.4",
-    "usb": "^2.5.2"
+    "usb": "^2.12.1"
   },
   "devDependencies": {
-    "@balena/lint": "^6.2.0",
-    "@types/debug": "^4.1.7",
-    "@types/node": "^8.10.61",
-    "node-gyp-build": "^4.5.0",
-    "rimraf": "^3.0.2",
-    "ts-node": "^10.9.1",
-    "typescript": "^4.8.4"
+    "@balena/lint": "8.0.1",
+    "@types/debug": "^4.1.12",
+    "@types/node": "^20.12.7",
+    "node-gyp-build": "^4.8.0",
+    "rimraf": "^5.0.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
   },
   "versionist": {
     "publishedAt": "2023-05-31T15:40:35.023Z"

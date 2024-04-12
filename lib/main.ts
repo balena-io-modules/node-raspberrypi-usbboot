@@ -1,4 +1,5 @@
-import { UsbbootDevice, UsbbootScanner } from './';
+import type { UsbbootDevice } from './';
+import { UsbbootScanner } from './';
 
 const main = () => {
 	const scanner = new UsbbootScanner();
