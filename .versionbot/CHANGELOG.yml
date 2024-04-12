@@ -1,4 +1,13 @@
 - commits:
+    - subject: "patch: bump all dependencies to latest"
+      hash: 1dd44c0ccdbff79a925267aeb3f33ca397f4e3f3
+      body: ""
+      footer: {}
+      author: Edwin Joassart
+  version: 1.0.8
+  title: ""
+  date: 2024-04-12T10:19:21.917Z
+- commits:
     - subject: Update flowzone.yml
       hash: a4ed24993a6bed92fac83e1f9f1f544c83995edd
       body: ""
@@ -50,7 +59,8 @@
         This is an attempt to fix the compute module not showing up on monterrey
 
 
-        As it turns out, that was not the problem, and the problem was that the fin was connected through a hub.
+        As it turns out, that was not the problem, and the problem was that the
+        fin was connected through a hub.
 
 
         This is still a useful change though.
