@@ -340,27 +340,41 @@ const getDeviceId = (device: usb.Device): string => {
 	return `${device.busNumber}:${device.deviceAddress}`;
 };
 
-const safeReadFile = async (filename: string): Promise<Buffer | undefined> => {
-	try {
-		return await readFile(Path.join(__dirname, '..', 'blobs', filename));
-	} catch (e) {
-		// no data
-	}
-};
-
 const getFileBuffer = async (
 	device: usb.Device,
 	filename: string,
+	extraFolder?: string,
 ): Promise<Buffer | undefined> => {
-	const folder =
-		device.deviceDescriptor.idProduct === USB_PRODUCT_ID_BCM2711_BOOT
-			? 'cm4'
-			: 'raspberrypi';
-	const buffer = await safeReadFile(Path.join(folder, filename));
-	if (buffer === undefined) {
-		debug("Can't read file", filename);
+	try {
+		if (extraFolder) {
+			const extraBuffer = await readFile(Path.join(extraFolder, filename));
+			if (extraBuffer !== undefined) {
+				debug(`Sending buffer from ${extraFolder}/${filename}`);
+				return extraBuffer;
+			}
+		}
+	} catch (e) {
+		// no data
 	}
-	return buffer;
+
+	try {
+		const folder =
+			device.deviceDescriptor.idProduct === USB_PRODUCT_ID_BCM2711_BOOT
+				? 'cm4'
+				: 'raspberrypi';
+
+		const buffer = await readFile(
+			Path.join(__dirname, '..', 'blobs', folder, filename),
+		);
+
+		if (buffer === undefined) {
+			debug("Can't read file", filename);
+		}
+
+		return buffer;
+	} catch (e) {
+		// no data
+	}
 };
 
 /**
@@ -468,8 +482,12 @@ export class UsbbootScanner extends EventEmitter {
 	// So we keep track of attached devices ids in attachedDeviceIds to not run it twice.
 	private attachedDeviceIds = new Set<string>();
 
-	constructor() {
+	private extraFolder: string | undefined;
+
+	constructor(extraFolder?: string) {
 		super();
+		this.extraFolder = extraFolder;
+		debug(`Extra folder: ${extraFolder}`);
 		this.boundAttachDevice = this.attachDevice.bind(this);
 		this.boundDetachDevice = this.detachDevice.bind(this);
 	}
@@ -585,8 +603,9 @@ export class UsbbootScanner extends EventEmitter {
 				// The device will now detach and reattach with iSerialNumber 1.
 				// This takes approximately 1.5 seconds
 			} else {
+				const extraFolder = this.extraFolder;
 				debug('Second stage boot server', devicePortId(device));
-				await this.fileServer(device, endpoint, 2);
+				await this.fileServer(device, endpoint, 2, extraFolder);
 			}
 			device.close();
 		} catch (error) {
@@ -628,6 +647,7 @@ export class UsbbootScanner extends EventEmitter {
 		device: usb.Device,
 		endpoint: OutEndpoint,
 		step: number,
+		extraFolder?: string,
 	) {
 		// eslint-disable-next-line no-constant-condition
 		while (true) {
@@ -658,7 +678,11 @@ export class UsbbootScanner extends EventEmitter {
 				message.command === FileMessageCommand.GetFileSize ||
 				message.command === FileMessageCommand.ReadFile
 			) {
-				const buffer = await getFileBuffer(device, message.filename);
+				const buffer = await getFileBuffer(
+					device,
+					message.filename,
+					extraFolder,
+				);
 				if (buffer === undefined) {
 					debug(`Couldn't find ${message.filename}`, devicePortId(device));
 					await sendSize(device, 0);

@@ -1,8 +1,22 @@
+import { argv } from 'process';
+import * as fs from 'fs';
 import type { UsbbootDevice } from './';
 import { UsbbootScanner } from './';
 
+const usbBootExtraFolder = argv.length > 2 ? isValidPath(argv[2]) : undefined;
+
+function isValidPath(path: string) {
+	if (fs.existsSync(path)) {
+		return path;
+	} else {
+		throw new Error(
+			'Invalid path provided as argument. Please provide a valid path if you want to use alternative boot assets.',
+		);
+	}
+}
+
 const main = () => {
-	const scanner = new UsbbootScanner();
+	const scanner = new UsbbootScanner(usbBootExtraFolder);
 	scanner.on('attach', (usbbootDevice: UsbbootDevice) => {
 		console.log('device attached', usbbootDevice.portId);
 		usbbootDevice.on('progress', (progress: number) => {
