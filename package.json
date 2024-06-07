@@ -5,7 +5,7 @@
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "scripts": {
-    "prettier": "balena-lint --fix --typescript lib/*.ts",
+    "prettier": "balena-lint --fix --typescript typings lib",
     "lint": "balena-lint --typescript lib/*.ts",
     "build": "npm run lint && rimraf build && tsc",
     "prepublish": "npm run build",
@@ -30,11 +30,11 @@
     "usb": "^2.12.1"
   },
   "devDependencies": {
-    "@balena/lint": "8.0.1",
+    "@balena/lint": "8.0.2",
     "@types/debug": "^4.1.12",
-    "@types/node": "^20.12.7",
-    "node-gyp-build": "^4.8.0",
-    "rimraf": "^5.0.5",
+    "@types/node": "^20.12.12",
+    "node-gyp-build": "^4.8.1",
+    "rimraf": "^5.0.7",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
   },
