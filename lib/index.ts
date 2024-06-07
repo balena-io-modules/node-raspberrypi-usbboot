@@ -7,7 +7,7 @@
 
 import { usb } from 'usb';
 import { OutEndpoint } from 'usb/dist/usb/endpoint';
-import { Interface } from 'usb/dist/usb/interface';
+import type { Interface } from 'usb/dist/usb/interface';
 import * as _debug from 'debug';
 import { EventEmitter } from 'events';
 import { readFile } from 'fs/promises';
@@ -478,6 +478,7 @@ export class UsbbootScanner extends EventEmitter {
 		debug('Waiting for BCM2835/6/7/2711');
 
 		// Prepare already connected devices
+		// eslint-disable-next-line @typescript-eslint/no-floating-promises
 		usb.getDeviceList().map(this.boundAttachDevice);
 
 		// At this point all devices from `usg.getDeviceList()` above
@@ -488,8 +489,7 @@ export class UsbbootScanner extends EventEmitter {
 		// Watch for devices detaching
 		usb.on('detach', this.boundDetachDevice);
 
-		// ts-ignore because of a confusion between NodeJS.Timer and number
-		// @ts-ignore
+		// @ts-expect-error because of a confusion between NodeJS.Timer and number
 		this.interval = setInterval(() => {
 			// usb.getDeviceList().forEach(this.boundAttachDevice);
 		}, POLLING_INTERVAL_MS);
@@ -548,7 +548,7 @@ export class UsbbootScanner extends EventEmitter {
 
 		const usbbootDevice = this.get(device);
 		let forceSecondstage = false;
-		if (device.deviceDescriptor.iSerialNumber == usbbootDevice?.last_serial) {
+		if (device.deviceDescriptor.iSerialNumber === usbbootDevice?.last_serial) {
 			if (usbbootDevice.step > 0) {
 				forceSecondstage = true;
 			}
@@ -565,14 +565,19 @@ export class UsbbootScanner extends EventEmitter {
 		if (!isUsbBootCapableUSBDevice$(device)) {
 			return;
 		}
-		debug('Found serial number', device.deviceDescriptor.iSerialNumber, `${forceSecondstage ? " => Forced second stage" : ""}`);
+		debug(
+			'Found serial number',
+			device.deviceDescriptor.iSerialNumber,
+			`${forceSecondstage ? ' => Forced second stage' : ''}`,
+		);
 		debug('port id', devicePortId(device));
 		try {
 			const { endpoint } = initializeDevice(device);
 			// cm: 0; cm4: 3
 			if (
 				(device.deviceDescriptor.iSerialNumber === 0 ||
-				device.deviceDescriptor.iSerialNumber === 3) && !forceSecondstage
+					device.deviceDescriptor.iSerialNumber === 3) &&
+				!forceSecondstage
 			) {
 				debug('Sending bootcode.bin', devicePortId(device));
 				this.step(device, 0);
@@ -624,6 +629,7 @@ export class UsbbootScanner extends EventEmitter {
 		endpoint: OutEndpoint,
 		step: number,
 	) {
+		// eslint-disable-next-line no-constant-condition
 		while (true) {
 			let data;
 			try {

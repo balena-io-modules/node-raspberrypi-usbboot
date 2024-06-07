@@ -5,7 +5,7 @@
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "scripts": {
-    "prettier": "balena-lint --fix --typescript lib/*.ts",
+    "prettier": "balena-lint --fix --typescript typings lib",
     "lint": "balena-lint --typescript lib/*.ts",
     "build": "npm run lint && rimraf build && tsc",
     "prepublish": "npm run build",
