@@ -1,4 +1,18 @@
 - commits:
+    - subject: "minor: allow passing custom assets to start SB protected CM4"
+      hash: 5d1566668843688344ad0fb4ef40dbd5a108858b
+      body: ""
+      footer: {}
+      author: Edwin Joassart
+    - subject: "patch: fix linter, formatting and old errors"
+      hash: a7fca7cb1bd4080274ced1112fa44a85feaafe51
+      body: ""
+      footer: {}
+      author: Edwin Joassart
+  version: 1.1.0
+  title: ""
+  date: 2024-06-07T11:51:34.801Z
+- commits:
     - subject: "patch: bump all dependencies to latest"
       hash: 1dd44c0ccdbff79a925267aeb3f33ca397f4e3f3
       body: ""
