@@ -11,4 +11,3 @@ jobs:
   flowzone:
     name: Flowzone
     uses: product-os/flowzone/.github/workflows/flowzone.yml@aethernet/cyclone-sbom-node
-    secrets: inherit
