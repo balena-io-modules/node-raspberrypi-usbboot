@@ -4,6 +4,7 @@
   "description": "Transforms Raspberry Pi Compute Modules and Zeros to mass storage devices.",
   "main": "build/index.js",
   "types": "build/index.d.ts",
+  "private": true,
   "scripts": {
     "prettier": "balena-lint --fix --typescript typings lib",
     "lint": "balena-lint --typescript lib/*.ts",
