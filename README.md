@@ -31,3 +31,6 @@ to reach higher write speeds at the cost of a longer preparation phase.
 If you have any trouble using this module, please check if it works with the original usb boot link above.
 
 You can enable debug output by setting the `DEBUG` env var to `node-raspberrypi-usbboot`.
+
+
+Test
