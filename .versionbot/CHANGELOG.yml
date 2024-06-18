@@ -1,4 +1,28 @@
 - commits:
+    - subject: "patch: private"
+      hash: ce2a4d7d404b8a24d12cffde80a6731c13d08d4f
+      body: ""
+      footer: {}
+      author: Edwin Joassart
+    - subject: "patch: test"
+      hash: 82fc2ce2fa53a85b283ba10108764a77044fa6df
+      body: ""
+      footer: {}
+      author: Edwin Joassart
+    - subject: "patch: test"
+      hash: 5bbefb22a72e18cc2c76cc2b436a72c0bc9138c1
+      body: ""
+      footer: {}
+      author: Edwin Joassart
+    - subject: "patch: switch to test flowzone"
+      hash: 366c7eff5fe02969ca5e1def5b6538445d01d259
+      body: ""
+      footer: {}
+      author: Edwin Joassart
+  version: 1.1.1
+  title: ""
+  date: 2024-06-18T09:46:47.568Z
+- commits:
     - subject: "minor: allow passing custom assets to start SB protected CM4"
       hash: 5d1566668843688344ad0fb4ef40dbd5a108858b
       body: ""
