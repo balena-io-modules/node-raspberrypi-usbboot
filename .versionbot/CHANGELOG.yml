@@ -1,4 +1,16 @@
 - commits:
+    - subject: Update dependency @balena/lint to v8.2.8
+      hash: e9ca9b0e8292c50556320e5ef0c74511c9e236fe
+      body: |
+        Update @balena/lint from 8.0.2 to 8.2.8
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: balena-renovate[bot]
+  version: 1.1.1
+  title: ""
+  date: 2025-03-19T16:06:11.858Z
+- commits:
     - subject: "minor: allow passing custom assets to start SB protected CM4"
       hash: 5d1566668843688344ad0fb4ef40dbd5a108858b
       body: ""
