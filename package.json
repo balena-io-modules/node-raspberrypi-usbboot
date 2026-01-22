@@ -32,7 +32,7 @@
   "devDependencies": {
     "@balena/lint": "8.2.8",
     "@types/debug": "^4.1.12",
-    "@types/node": "^20.12.12",
+    "@types/node": "^22.0.0",
     "node-gyp-build": "^4.8.1",
     "rimraf": "^6.0.0",
     "ts-node": "^10.9.2",
