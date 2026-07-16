@@ -1,4 +1,16 @@
 - commits:
+    - subject: Update dependency @types/node to v20.19.43
+      hash: 92c7ce94d4c3fd2142d566a6d7d2ced23221453e
+      body: |
+        Update @types/node from 20.19.42 to 20.19.43
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: balena-renovate[bot]
+  version: 1.1.12
+  title: ""
+  date: 2026-07-16T07:42:12.805Z
+- commits:
     - subject: Pin dependencies
       hash: aa376c4527578cc6a2ded1e900302395658038aa
       body: |
