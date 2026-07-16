@@ -36,7 +36,7 @@
     "node-gyp-build": "4.8.4",
     "rimraf": "6.1.3",
     "ts-node": "10.9.2",
-    "typescript": "5.9.3"
+    "typescript": "6.0.3"
   },
   "versionist": {
     "publishedAt": "2026-07-16T07:42:12.872Z"
