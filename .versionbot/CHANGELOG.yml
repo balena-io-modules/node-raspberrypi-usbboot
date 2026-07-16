@@ -1,4 +1,16 @@
 - commits:
+    - subject: Pin dependencies
+      hash: aa376c4527578cc6a2ded1e900302395658038aa
+      body: |
+        Update @types/debug
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: balena-renovate[bot]
+  version: 1.1.11
+  title: ""
+  date: 2026-07-16T06:39:33.846Z
+- commits:
     - subject: Lock file maintenance
       hash: 03f7f912229c87514f72709f99a3775cda54d3a0
       body: |
