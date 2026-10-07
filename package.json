@@ -27,7 +27,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "debug": "^4.3.4",
-    "usb": "^2.12.1"
+    "usb": "^3.0.0"
   },
   "devDependencies": {
     "@balena/lint": "8.2.8",
