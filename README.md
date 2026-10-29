@@ -23,6 +23,9 @@ This is heavily based on [Raspberry Pi USB booting code](https://github.com/rasp
 
 It should support Raspberry Pi Compute Modules and Raspberry Pi Zeros.
 
+The CM5 boots the [mass-storage-gadget64](https://github.com/raspberrypi/usbboot/tree/master/mass-storage-gadget64)
+Linux initramfs, which exposes the device's block storage over USB. The files used for this purpose are located in `blobs/rpi5`.
+
 This module will upload a slightly more complex kernel to the pis than the original code above, it allows the devices
 to reach higher write speeds at the cost of a longer preparation phase.
 

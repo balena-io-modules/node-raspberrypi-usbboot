@@ -124,7 +124,11 @@ const USB_VENDOR_ID_BROADCOM_CORPORATION = 0x0a5c;
 const USB_PRODUCT_ID_BCM2708_BOOT = 0x2763;
 const USB_PRODUCT_ID_BCM2710_BOOT = 0x2764;
 const USB_PRODUCT_ID_BCM2711_BOOT = 0x2711;
+const USB_PRODUCT_ID_BCM2712_BOOT = 0x2712;
 const USB_PRODUCT_ID_BCM2711_MASS_STORAGE = 1;
+
+// The CM5 mass-storage-gadget64 reattaches as a "Raspberry Pi multi-function USB device"
+const USB_PRODUCT_ID_BCM2712_MASS_STORAGE = 0x0104;
 
 // When the pi reboots in mass storage mode, it has this product id
 const USB_VENDOR_ID_NETCHIP_TECHNOLOGY = 0x0525;
@@ -132,6 +136,9 @@ const USB_PRODUCT_ID_POCKETBOOK_PRO_903 = 0xa4a5;
 
 // Delay in ms after which we consider that the device was unplugged (not resetted)
 const DEVICE_UNPLUG_TIMEOUT = 5000;
+
+// The CM5 boots a Linux initramfs before reattaching as a mass storage device, which takes longer than other RPI boards.
+const CM5_DEVICE_UNPLUG_TIMEOUT = 30000;
 
 // Delay (in ms) to wait when epRead throws an error
 const READ_ERROR_DELAY = 100;
@@ -216,7 +223,8 @@ export const isUsbBootCapableUSBDevice = (
 		idVendor === USB_VENDOR_ID_BROADCOM_CORPORATION &&
 		(idProduct === USB_PRODUCT_ID_BCM2708_BOOT ||
 			idProduct === USB_PRODUCT_ID_BCM2710_BOOT ||
-			idProduct === USB_PRODUCT_ID_BCM2711_BOOT)
+			idProduct === USB_PRODUCT_ID_BCM2711_BOOT ||
+			idProduct === USB_PRODUCT_ID_BCM2712_BOOT)
 	);
 };
 
@@ -238,6 +246,13 @@ const isComputeModule4InMassStorageMode = (device: usb.Device): boolean => {
 	return (
 		device.deviceDescriptor.idVendor === USB_VENDOR_ID_BROADCOM_CORPORATION &&
 		device.deviceDescriptor.idProduct === USB_PRODUCT_ID_BCM2711_MASS_STORAGE
+	);
+};
+
+const isRaspberryPi5InMassStorageMode = (device: usb.Device): boolean => {
+	return (
+		device.deviceDescriptor.idVendor === USB_VENDOR_ID_BROADCOM_CORPORATION &&
+		device.deviceDescriptor.idProduct === USB_PRODUCT_ID_BCM2712_MASS_STORAGE
 	);
 };
 
@@ -361,7 +376,9 @@ const getFileBuffer = async (
 		const folder =
 			device.deviceDescriptor.idProduct === USB_PRODUCT_ID_BCM2711_BOOT
 				? 'cm4'
-				: 'raspberrypi';
+				: device.deviceDescriptor.idProduct === USB_PRODUCT_ID_BCM2712_BOOT
+					? 'rpi5'
+					: 'raspberrypi';
 
 		const buffer = await readFile(
 			Path.join(__dirname, '..', 'blobs', folder, filename),
@@ -408,10 +425,23 @@ const createBootMessageBuffer = (bootCodeBufferLength: number): Buffer => {
 	return bootMessageBuffer;
 };
 
-const secondStageBoot = async (device: usb.Device, endpoint: OutEndpoint) => {
-	const bootcodeBuffer = await getFileBuffer(device, 'bootcode.bin');
+const secondStageBoot = async (
+	device: usb.Device,
+	endpoint: OutEndpoint,
+	extraFolder?: string,
+) => {
+	// BCM2712 uses its own second stage bootloader, as in rpiboot
+	const bootcodeFilename =
+		device.deviceDescriptor.idProduct === USB_PRODUCT_ID_BCM2712_BOOT
+			? 'bootcode5.bin'
+			: 'bootcode.bin';
+	const bootcodeBuffer = await getFileBuffer(
+		device,
+		bootcodeFilename,
+		extraFolder,
+	);
 	if (bootcodeBuffer === undefined) {
-		throw new Error("Can't find bootcode.bin");
+		throw new Error(`Can't find ${bootcodeFilename}`);
 	}
 	const bootMessage = createBootMessageBuffer(bootcodeBuffer.length);
 	await epWrite(bootMessage, device, endpoint);
@@ -472,6 +502,17 @@ export class CM4 extends UsbbootDevice {
 	public readonly LAST_STEP = 10;
 }
 
+export class CM5 extends UsbbootDevice {
+	// LAST_STEP is hardcoded here as it is depends on the files the mass-storage-gadget64 bootloader requests.
+	// List of steps:
+	// 0) device connects with iSerialNumber 0 or 3 and we write bootcode5.bin to it
+	// 1) the device detaches
+	// 2 - 21) the device reattaches and we upload the files it requires
+	// 22) the device detaches
+	// 23) the device reattaches as a mass storage device, created by the Pi5 initramfs
+	public readonly LAST_STEP = 23;
+}
+
 export class UsbbootScanner extends EventEmitter {
 	private usbbootDevices = new Map<string, UsbbootDevice>();
 	private boundAttachDevice: (device: usb.Device) => Promise<void>;
@@ -493,7 +534,7 @@ export class UsbbootScanner extends EventEmitter {
 	}
 
 	public start(): void {
-		debug('Waiting for BCM2835/6/7/2711');
+		debug('Waiting for BCM2835/6/7/2711/2712');
 
 		// Prepare already connected devices
 		// eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -541,7 +582,9 @@ export class UsbbootScanner extends EventEmitter {
 			const Cls =
 				device.deviceDescriptor.idProduct === USB_PRODUCT_ID_BCM2711_BOOT
 					? CM4
-					: CM3;
+					: device.deviceDescriptor.idProduct === USB_PRODUCT_ID_BCM2712_BOOT
+						? CM5
+						: CM3;
 			usbbootDevice = new Cls(key);
 			this.usbbootDevices.set(key, usbbootDevice);
 			this.emit('attach', usbbootDevice);
@@ -580,6 +623,14 @@ export class UsbbootScanner extends EventEmitter {
 			this.step(device, usbbootDevice.LAST_STEP);
 			return;
 		}
+		if (
+			isRaspberryPi5InMassStorageMode(device) &&
+			usbbootDevice instanceof CM5
+		) {
+			debug('CM5 attached as a mass storage device', devicePortId(device));
+			this.step(device, usbbootDevice.LAST_STEP);
+			return;
+		}
 		if (!isUsbBootCapableUSBDevice$(device)) {
 			return;
 		}
@@ -599,7 +650,7 @@ export class UsbbootScanner extends EventEmitter {
 			) {
 				debug('Sending bootcode.bin', devicePortId(device));
 				this.step(device, 0);
-				await secondStageBoot(device, endpoint);
+				await secondStageBoot(device, endpoint, this.extraFolder);
 				// The device will now detach and reattach with iSerialNumber 1.
 				// This takes approximately 1.5 seconds
 			} else {
@@ -620,12 +671,19 @@ export class UsbbootScanner extends EventEmitter {
 			return;
 		}
 		const usbbootDevice = this.getOrCreate(device);
-		const step =
-			device.deviceDescriptor.iSerialNumber === 1
-				? usbbootDevice.LAST_STEP - 1
-				: 1;
+		// The CM5 doesn't reattach with iSerialNumber 1 for the second stage,
+		// so we rely on the file server having run instead
+		const isSecondStage =
+			usbbootDevice instanceof CM5
+				? usbbootDevice.step > 1
+				: device.deviceDescriptor.iSerialNumber === 1;
+		const step = isSecondStage ? usbbootDevice.LAST_STEP - 1 : 1;
 		debug('detach', devicePortId(device), step);
 		this.step(device, step);
+		const unplugTimeout =
+			usbbootDevice instanceof CM5
+				? CM5_DEVICE_UNPLUG_TIMEOUT
+				: DEVICE_UNPLUG_TIMEOUT;
 		// This timeout is here to differentiate between the device resetting and the device being unplugged
 		// If the step didn't changed in 5 seconds, we assume the device was unplugged.
 		setTimeout(() => {
@@ -635,12 +693,12 @@ export class UsbbootScanner extends EventEmitter {
 					'device',
 					devicePortId(device),
 					'did not reattached after',
-					DEVICE_UNPLUG_TIMEOUT,
+					unplugTimeout,
 					'ms.',
 				);
 				this.remove(device);
 			}
-		}, DEVICE_UNPLUG_TIMEOUT);
+		}, unplugTimeout);
 	}
 
 	private async fileServer(
