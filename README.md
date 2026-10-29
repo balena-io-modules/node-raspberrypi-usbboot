@@ -1,6 +1,6 @@
 # node-rasbberrypi-usbboot
 
-Transforms Raspberry Pi Compute Modules and Zeros to mass storage devices.
+Transforms Raspberry Pi Compute Modules, Zeros and Raspberry Pi 5 to mass storage devices.
 
 ## Usage
 
@@ -21,7 +21,10 @@ will no longer be a usbboot device).
 
 This is heavily based on [Raspberry Pi USB booting code](https://github.com/raspberrypi/usbboot).
 
-It should support Raspberry Pi Compute Modules and Raspberry Pi Zeros.
+It should support Raspberry Pi Compute Modules, Raspberry Pi Zeros and Raspberry Pi 5.
+
+The Raspberry Pi 5 boots the [mass-storage-gadget64](https://github.com/raspberrypi/usbboot/tree/master/mass-storage-gadget64)
+Linux initramfs, which exposes the device's block storage over USB. The files used for this purpose are located in `blobs/rpi5`.
 
 This module will upload a slightly more complex kernel to the pis than the original code above, it allows the devices
 to reach higher write speeds at the cost of a longer preparation phase.
